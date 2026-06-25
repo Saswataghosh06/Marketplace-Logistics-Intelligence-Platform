@@ -56,3 +56,15 @@ models:
       - name: total_shipments
         tests:
           - not_null
+  - name: mart_region_performance
+
+    columns:
+
+      - name: customer_region
+        tests:
+          - unique
+          - not_null
+
+      - name: total_shipments
+        tests:
+          - not_null    
