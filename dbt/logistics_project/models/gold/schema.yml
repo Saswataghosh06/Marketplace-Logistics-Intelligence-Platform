@@ -14,3 +14,45 @@ models:
       - name: full_date
         tests:
           - not_null
+
+  - name: mart_carrier_performance
+
+    columns:
+
+      - name: carrier_id
+        tests:
+          - unique
+          - not_null
+
+      - name: carrier_name
+        tests:
+          - not_null
+
+      - name: total_shipments
+        tests:
+          - not_null
+
+  - name: mart_warehouse_performance
+
+    columns:
+
+      - name: warehouse_id
+        tests:
+          - unique
+          - not_null
+
+      - name: warehouse_name
+        tests:
+          - not_null
+
+      - name: warehouse_type
+        tests:
+          - not_null
+
+      - name: region
+        tests:
+          - not_null
+
+      - name: total_shipments
+        tests:
+          - not_null
