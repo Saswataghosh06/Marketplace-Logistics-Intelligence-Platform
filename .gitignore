@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.python-version
+
+# dbt artifacts
+target/
+dbt_packages/
+logs/
+
+# DuckDB databases
+*.duckdb
+*.wal
+
+# Warehouse outputs
+warehouse/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+version: 2
+
+models:
+
+  - name: mart_logistics_overview
+
+    columns:
+
+      - name: date_key
+        tests:
+          - unique
+          - not_null
+
+      - name: full_date
+        tests:
+          - not_null

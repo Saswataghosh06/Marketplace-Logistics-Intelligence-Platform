@@ -1,0 +1,42 @@
+name: 'logistics_project'
+version: '1.0.0'
+
+profile: 'logistics_project'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  logistics_project:
+
+    bronze:
+      +materialized: view
+
+    silver:
+      +materialized: table
+
+      staging:
+        +schema: silver
+
+      dimensions:
+        +schema: silver
+
+      facts:
+        +schema: silver
+
+    gold:
+      +materialized: table
+
+      marts:
+        +schema: gold
+
+      metrics:
+        +schema: gold

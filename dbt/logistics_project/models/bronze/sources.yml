@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw bronze layer loaded from parquet files into DuckDB views.
+
+    schema: bronze
+
+    tables:
+      - name: dim_date
+      - name: dim_sellers
+      - name: dim_products
+      - name: dim_customers_scd
+      - name: dim_carriers_scd
+      - name: dim_warehouses
+      - name: dim_regions
+      - name: fact_orders
+      - name: fact_order_items
+      - name: fact_shipments
+      - name: fact_tracking_events

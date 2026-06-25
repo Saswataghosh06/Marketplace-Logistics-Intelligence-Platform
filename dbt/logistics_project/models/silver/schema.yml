@@ -1,0 +1,109 @@
+version: 2
+
+models:
+
+  - name: dim_customers
+    columns:
+      - name: customer_sk
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        tests:
+          - not_null
+
+  - name: dim_products
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+
+      - name: seller_id
+        tests:
+          - not_null
+
+  - name: dim_sellers
+    columns:
+      - name: seller_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_warehouses
+    columns:
+      - name: warehouse_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_carriers
+    columns:
+      - name: carrier_sk
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    columns:
+      - name: date_key
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+
+  - name: fct_order_items
+    columns:
+      - name: order_item_id
+        tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+              config:
+                where: "product_id is not null"
+
+  - name: fct_shipments
+    columns:
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+
+      - name: carrier_id
+        tests:
+          - relationships:
+              to: ref('dim_carriers')
+              field: carrier_id
+
+      - name: warehouse_id
+        tests:
+          - relationships:
+              to: ref('dim_warehouses')
+              field: warehouse_id
+              config:
+                where: "warehouse_id is not null"
+
+  - name: fct_tracking_events
+    columns:
+      - name: tracking_event_id
+        tests:
+          - not_null
