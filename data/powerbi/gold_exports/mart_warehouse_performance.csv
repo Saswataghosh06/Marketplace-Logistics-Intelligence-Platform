@@ -1,0 +1,121 @@
+warehouse_id,warehouse_name,warehouse_type,city,state,region,capacity_units,warehouse_rating,total_shipments,delivered_shipments,on_time_shipments,sla_breached_shipments,sla_breach_pct,avg_transit_days,avg_delay_days,total_shipping_cost,avg_shipping_cost,shipping_cost_per_kg
+28,Bangalore_FC_28,Tier 1,Bangalore,Karnataka,South India,579000,3.95,3492,2978,2978,271,7.76,4.95,0.04,690162.27,197.64,9.71
+11,Kochi_FC_11,Tier 2,Kochi,Kerala,South India,227376,4.76,3537,2976,2976,300,8.48,5.0,0.04,699006.53,197.63,9.69
+85,Jaipur_FC_85,Tier 2,Jaipur,Rajasthan,North India,172789,4.09,5129,4360,4360,393,7.66,4.95,0.03,1008097.33,196.55,9.73
+29,Kolkata_FC_29,Tier 2,Kolkata,West Bengal,East India,238497,4.66,7223,6087,6087,593,8.21,5.01,0.05,1447433.32,200.39,9.62
+100,Mumbai_FC_100,Tier 1,Mumbai,Maharashtra,West India,596901,4.85,2264,1897,1897,181,7.99,4.9,0.04,437989.19,193.46,9.8
+96,Indore_FC_96,Tier 2,Indore,Madhya Pradesh,Central India,147026,4.69,4544,3827,3827,373,8.21,4.97,0.05,895018.52,196.97,9.72
+5,Patna_FC_5,Tier 2,Patna,Bihar,East India,224999,3.99,7387,6283,6283,580,7.85,4.94,0.04,1455578.45,197.05,9.75
+117,Hyderabad_FC_117,Tier 1,Hyderabad,Telangana,South India,288384,4.59,3507,3003,3003,261,7.44,4.97,0.03,689439.04,196.59,9.75
+97,Hyderabad_FC_97,Tier 1,Hyderabad,Telangana,South India,359613,3.86,3539,2965,2965,308,8.7,5.02,0.07,690419.5,195.09,9.73
+20,Lucknow_FC_20,Tier 2,Lucknow,Uttar Pradesh,North India,181321,3.91,5291,4447,4447,435,8.22,4.98,0.05,1035309.73,195.67,9.74
+10,Nagpur_FC_10,Tier 2,Nagpur,Maharashtra,West India,161452,4.1,2314,1966,1966,169,7.3,4.91,0.04,455915.63,197.02,9.78
+8,Hyderabad_FC_8,Tier 1,Hyderabad,Telangana,South India,479705,3.89,3635,3116,3116,244,6.71,4.95,0.02,723798.34,199.12,9.66
+53,Mumbai_FC_53,Tier 1,Mumbai,Maharashtra,West India,289986,4.44,2350,2004,2004,169,7.19,4.97,0.04,466831.56,198.65,9.71
+30,Mumbai_FC_30,Tier 1,Mumbai,Maharashtra,West India,328169,3.92,2273,1925,1925,181,7.96,4.97,0.05,449957.17,197.96,9.73
+81,Nagpur_FC_81,Tier 2,Nagpur,Maharashtra,West India,207953,4.34,2267,1932,1932,174,7.68,4.91,0.04,447401.1,197.35,9.76
+116,Nagpur_FC_116,Tier 2,Nagpur,Maharashtra,West India,141296,4.64,2330,1985,1985,176,7.55,4.94,0.03,458435.74,196.75,9.74
+74,Indore_FC_74,Tier 2,Indore,Madhya Pradesh,Central India,163231,4.35,4548,3855,3855,337,7.41,4.9,0.03,890744.63,195.85,9.8
+27,Patna_FC_27,Tier 2,Patna,Bihar,East India,238915,4.85,7492,6294,6294,603,8.05,4.96,0.05,1462447.25,195.2,9.73
+18,Indore_FC_18,Tier 2,Indore,Madhya Pradesh,Central India,125908,4.46,4605,3877,3877,378,8.21,5.06,0.05,910317.19,197.68,9.7
+32,Nagpur_FC_32,Tier 2,Nagpur,Maharashtra,West India,245194,4.23,2244,1912,1912,191,8.51,5.03,0.07,438151.85,195.25,9.74
+2,Chennai_FC_2,Tier 1,Chennai,Tamil Nadu,South India,587772,4.01,3556,2978,2978,306,8.61,4.97,0.06,712210.31,200.28,9.68
+67,Delhi_FC_67,Tier 1,Delhi,Delhi,North India,397016,4.38,5175,4390,4390,395,7.63,4.89,0.04,1008128.66,194.81,9.83
+120,Hyderabad_FC_120,Tier 1,Hyderabad,Telangana,South India,337130,4.61,3520,2958,2958,284,8.07,5.02,0.05,691918.73,196.57,9.69
+60,Delhi_FC_60,Tier 1,Delhi,Delhi,North India,537607,4.8,5146,4367,4367,409,7.95,4.98,0.05,1041443.7,202.38,9.61
+110,Kolkata_FC_110,Tier 2,Kolkata,West Bengal,East India,199113,4.93,7129,6039,6039,576,8.08,4.95,0.04,1410032.42,197.79,9.72
+1,Kolkata_FC_1,Tier 2,Kolkata,West Bengal,East India,191184,4.58,7270,6132,6132,545,7.5,4.98,0.04,1448890.06,199.3,9.68
+21,Indore_FC_21,Tier 2,Indore,Madhya Pradesh,Central India,205831,4.3,4531,3833,3833,355,7.83,5.0,0.04,883317.3,194.95,9.76
+12,Ahmedabad_FC_12,Tier 2,Ahmedabad,Gujarat,West India,157376,4.78,2320,1947,1947,201,8.66,5.02,0.06,449684.67,193.83,9.69
+87,Indore_FC_87,Tier 2,Indore,Madhya Pradesh,Central India,191477,4.71,4492,3816,3816,324,7.21,5.02,0.02,892684.83,198.73,9.61
+49,Nagpur_FC_49,Tier 2,Nagpur,Maharashtra,West India,163220,4.78,2306,1937,1937,196,8.5,4.92,0.09,447483.73,194.05,9.83
+13,Lucknow_FC_13,Tier 2,Lucknow,Uttar Pradesh,North India,233614,4.97,5252,4455,4455,414,7.88,4.99,0.05,1039798.98,197.98,9.72
+105,Pune_FC_105,Tier 1,Pune,Maharashtra,West India,578797,3.95,2394,2045,2045,194,8.1,5.0,0.04,473805.73,197.91,9.66
+17,Lucknow_FC_17,Tier 2,Lucknow,Uttar Pradesh,North India,166797,3.96,5198,4376,4376,440,8.46,4.96,0.06,1015325.81,195.33,9.79
+16,Indore_FC_16,Tier 2,Indore,Madhya Pradesh,Central India,197211,4.7,4587,3885,3885,364,7.94,4.98,0.05,906786.74,197.69,9.75
+107,Patna_FC_107,Tier 2,Patna,Bihar,East India,213199,4.39,7358,6236,6236,583,7.92,4.98,0.03,1462882.98,198.82,9.66
+19,Chennai_FC_19,Tier 1,Chennai,Tamil Nadu,South India,595135,4.46,3434,2912,2912,276,8.04,4.92,0.03,681309.32,198.4,9.73
+102,Jaipur_FC_102,Tier 2,Jaipur,Rajasthan,North India,135262,4.67,5134,4352,4352,399,7.77,4.93,0.04,1006991.86,196.14,9.77
+51,Kolkata_FC_51,Tier 2,Kolkata,West Bengal,East India,159658,4.42,7398,6290,6290,594,8.03,5.01,0.04,1466800.84,198.27,9.67
+46,Hyderabad_FC_46,Tier 1,Hyderabad,Telangana,South India,420244,4.71,3444,2939,2939,264,7.67,4.99,0.03,693736.42,201.43,9.54
+22,Mumbai_FC_22,Tier 1,Mumbai,Maharashtra,West India,283013,4.82,2368,2015,2015,192,8.11,4.97,0.05,463552.59,195.76,9.74
+43,Jaipur_FC_43,Tier 2,Jaipur,Rajasthan,North India,193555,4.31,5174,4394,4394,423,8.18,4.98,0.05,1021891.32,197.51,9.73
+7,Bangalore_FC_7,Tier 1,Bangalore,Karnataka,South India,501841,4.42,3528,2971,2971,289,8.19,4.96,0.04,690748.34,195.79,9.8
+92,Mumbai_FC_92,Tier 1,Mumbai,Maharashtra,West India,599856,4.73,2292,1936,1936,188,8.2,4.95,0.04,454517.22,198.31,9.71
+31,Mumbai_FC_31,Tier 1,Mumbai,Maharashtra,West India,421639,4.55,2389,2053,2053,165,6.91,4.98,0.01,472646.53,197.84,9.72
+75,Mumbai_FC_75,Tier 1,Mumbai,Maharashtra,West India,499567,4.17,2417,2037,2037,201,8.32,4.95,0.06,479029.17,198.19,9.71
+66,Jaipur_FC_66,Tier 2,Jaipur,Rajasthan,North India,207253,4.75,5164,4393,4393,406,7.86,5.02,0.04,1046385.01,202.63,9.55
+63,Hyderabad_FC_63,Tier 1,Hyderabad,Telangana,South India,444446,4.39,3535,2967,2967,303,8.57,5.01,0.08,702641.21,198.77,9.69
+35,Kolkata_FC_35,Tier 2,Kolkata,West Bengal,East India,150703,4.57,7446,6300,6300,604,8.11,4.96,0.05,1471371.36,197.61,9.73
+95,Hyderabad_FC_95,Tier 1,Hyderabad,Telangana,South India,273700,4.05,3442,2941,2941,280,8.13,4.94,0.04,671309.3,195.03,9.82
+24,Hyderabad_FC_24,Tier 1,Hyderabad,Telangana,South India,398275,3.92,3589,3003,3003,301,8.39,5.0,0.05,709351.45,197.65,9.73
+118,Bangalore_FC_118,Tier 1,Bangalore,Karnataka,South India,467607,4.99,3566,3007,3007,299,8.38,5.02,0.05,712104.44,199.69,9.65
+80,Patna_FC_80,Tier 2,Patna,Bihar,East India,156717,4.23,7431,6276,6276,594,7.99,4.98,0.05,1461680.53,196.7,9.74
+26,Nagpur_FC_26,Tier 2,Nagpur,Maharashtra,West India,245741,4.12,2347,1974,1974,191,8.14,4.97,0.05,456885.63,194.67,9.77
+79,Patna_FC_79,Tier 2,Patna,Bihar,East India,228332,4.46,7461,6308,6308,606,8.12,4.93,0.04,1467775.21,196.73,9.78
+90,Mumbai_FC_90,Tier 1,Mumbai,Maharashtra,West India,301123,3.83,2326,1954,1954,189,8.13,4.98,0.06,451988.78,194.32,9.73
+56,Ahmedabad_FC_56,Tier 2,Ahmedabad,Gujarat,West India,111502,4.39,2297,1930,1930,195,8.49,4.97,0.04,455235.33,198.19,9.69
+109,Patna_FC_109,Tier 2,Patna,Bihar,East India,141698,4.04,7284,6185,6185,572,7.85,5.0,0.04,1435957.39,197.14,9.72
+47,Mumbai_FC_47,Tier 1,Mumbai,Maharashtra,West India,426238,3.93,2361,1963,1963,219,9.28,4.86,0.07,466157.35,197.44,9.82
+57,Hyderabad_FC_57,Tier 1,Hyderabad,Telangana,South India,494885,4.37,3605,3070,3070,300,8.32,4.94,0.05,698127.63,193.66,9.81
+69,Hyderabad_FC_69,Tier 1,Hyderabad,Telangana,South India,299011,3.93,3529,3010,3010,250,7.08,4.87,0.02,692626.32,196.27,9.74
+71,Jaipur_FC_71,Tier 2,Jaipur,Rajasthan,North India,131137,4.94,5114,4383,4383,367,7.18,4.95,0.03,1002001.48,195.93,9.74
+39,Chennai_FC_39,Tier 1,Chennai,Tamil Nadu,South India,392575,3.95,3568,2995,2995,291,8.16,4.98,0.05,699370.15,196.01,9.71
+48,Pune_FC_48,Tier 1,Pune,Maharashtra,West India,497140,4.41,2355,2007,2007,193,8.2,4.97,0.06,465402.38,197.62,9.71
+50,Lucknow_FC_50,Tier 2,Lucknow,Uttar Pradesh,North India,187406,4.92,5072,4295,4295,402,7.93,4.95,0.04,1001190.03,197.4,9.71
+94,Bangalore_FC_94,Tier 1,Bangalore,Karnataka,South India,332289,4.48,3490,2956,2956,285,8.17,5.01,0.04,678580.19,194.44,9.75
+25,Chennai_FC_25,Tier 1,Chennai,Tamil Nadu,South India,378080,3.91,3507,3037,3037,260,7.41,4.96,0.04,684846.75,195.28,9.75
+115,Delhi_FC_115,Tier 1,Delhi,Delhi,North India,294473,4.12,5107,4329,4329,419,8.2,4.97,0.04,1000693.39,195.95,9.79
+101,Kolkata_FC_101,Tier 2,Kolkata,West Bengal,East India,159146,4.22,7496,6411,6411,546,7.28,4.91,0.03,1473224.3,196.53,9.75
+9,Bangalore_FC_9,Tier 1,Bangalore,Karnataka,South India,258989,4.55,3544,2991,2991,300,8.47,5.02,0.05,711455.98,200.75,9.63
+88,Pune_FC_88,Tier 1,Pune,Maharashtra,West India,487164,4.05,2301,1945,1945,185,8.04,4.91,0.04,456122.52,198.23,9.76
+61,Kolkata_FC_61,Tier 2,Kolkata,West Bengal,East India,135578,4.28,7423,6249,6249,598,8.06,5.0,0.04,1470987.95,198.17,9.67
+104,Indore_FC_104,Tier 2,Indore,Madhya Pradesh,Central India,153520,4.89,4586,3871,3871,385,8.4,4.97,0.06,905755.29,197.5,9.72
+37,Indore_FC_37,Tier 2,Indore,Madhya Pradesh,Central India,180304,4.66,4421,3724,3724,338,7.65,5.1,0.03,882264.78,199.56,9.62
+89,Lucknow_FC_89,Tier 2,Lucknow,Uttar Pradesh,North India,143068,4.65,5188,4414,4414,394,7.59,4.98,0.03,1026978.64,197.95,9.7
+36,Bangalore_FC_36,Tier 1,Bangalore,Karnataka,South India,306867,4.08,3608,3059,3059,283,7.84,4.92,0.04,726925.25,201.48,9.69
+41,Kochi_FC_41,Tier 2,Kochi,Kerala,South India,205369,4.51,3577,3032,3032,280,7.83,4.94,0.04,692970.65,193.73,9.82
+72,Delhi_FC_72,Tier 1,Delhi,Delhi,North India,381238,4.17,5132,4325,4325,380,7.4,4.92,0.02,1009028.56,196.62,9.73
+78,Kochi_FC_78,Tier 2,Kochi,Kerala,South India,101666,4.45,3486,2969,2969,270,7.75,4.94,0.03,689277.87,197.73,9.72
+111,Mumbai_FC_111,Tier 1,Mumbai,Maharashtra,West India,339849,4.97,2346,1986,1986,197,8.4,4.88,0.06,449337.59,191.53,9.96
+14,Kochi_FC_14,Tier 2,Kochi,Kerala,South India,137930,4.4,3582,3029,3029,297,8.29,4.94,0.06,700571.55,195.58,9.82
+82,Pune_FC_82,Tier 1,Pune,Maharashtra,West India,302477,4.96,2381,2035,2035,181,7.6,5.0,0.03,469852.85,197.33,9.72
+58,Ahmedabad_FC_58,Tier 2,Ahmedabad,Gujarat,West India,240241,4.39,2385,2023,2023,185,7.76,5.01,0.06,472405.62,198.07,9.71
+4,Hyderabad_FC_4,Tier 1,Hyderabad,Telangana,South India,394501,4.54,3496,2960,2960,273,7.81,4.93,0.04,682827.85,195.32,9.81
+114,Kochi_FC_114,Tier 2,Kochi,Kerala,South India,210193,4.45,3467,2928,2928,264,7.61,4.93,0.03,692046.8,199.61,9.67
+76,Indore_FC_76,Tier 2,Indore,Madhya Pradesh,Central India,172635,3.84,4441,3731,3731,372,8.38,5.02,0.06,875381.24,197.11,9.73
+83,Delhi_FC_83,Tier 1,Delhi,Delhi,North India,514084,4.25,5141,4358,4358,405,7.88,4.97,0.04,1015925.41,197.61,9.74
+98,Hyderabad_FC_98,Tier 1,Hyderabad,Telangana,South India,319535,4.82,3540,2990,2990,283,7.99,4.94,0.04,696870.62,196.86,9.72
+40,Jaipur_FC_40,Tier 2,Jaipur,Rajasthan,North India,152289,4.84,5118,4324,4324,427,8.34,4.99,0.05,1002976.68,195.97,9.79
+91,Kochi_FC_91,Tier 2,Kochi,Kerala,South India,249868,4.3,3568,3018,3018,278,7.79,4.99,0.03,718104.2,201.26,9.59
+106,Nagpur_FC_106,Tier 2,Nagpur,Maharashtra,West India,178536,4.01,2327,1961,1961,186,7.99,4.91,0.03,460664.48,197.96,9.73
+68,Kochi_FC_68,Tier 2,Kochi,Kerala,South India,217922,4.2,3483,2930,2930,297,8.53,5.09,0.06,686198.7,197.01,9.64
+38,Indore_FC_38,Tier 2,Indore,Madhya Pradesh,Central India,211371,4.85,4719,4018,4018,376,7.97,5.03,0.04,929702.41,197.01,9.69
+65,Chennai_FC_65,Tier 1,Chennai,Tamil Nadu,South India,256133,4.09,3493,2974,2974,263,7.53,4.91,0.03,677607.92,193.99,9.82
+73,Nagpur_FC_73,Tier 2,Nagpur,Maharashtra,West India,240742,4.0,2343,1970,1970,189,8.07,4.99,0.04,465237.5,198.56,9.72
+77,Lucknow_FC_77,Tier 2,Lucknow,Uttar Pradesh,North India,143787,4.19,5179,4438,4438,363,7.01,4.98,0.03,1032299.14,199.32,9.7
+42,Kochi_FC_42,Tier 2,Kochi,Kerala,South India,248167,3.95,3531,3022,3022,246,6.97,4.94,0.03,693443.36,196.39,9.77
+119,Delhi_FC_119,Tier 1,Delhi,Delhi,North India,477865,4.12,5156,4347,4347,431,8.36,4.98,0.04,1019393.23,197.71,9.67
+34,Pune_FC_34,Tier 1,Pune,Maharashtra,West India,250765,4.08,2328,1949,1949,190,8.16,4.93,0.04,459471.93,197.37,9.78
+3,Hyderabad_FC_3,Tier 1,Hyderabad,Telangana,South India,485585,4.85,3433,2910,2910,260,7.57,4.96,0.04,662177.97,192.89,9.83
+113,Lucknow_FC_113,Tier 2,Lucknow,Uttar Pradesh,North India,145900,4.91,5172,4377,4377,420,8.12,4.99,0.05,1019278.03,197.08,9.71
+93,Chennai_FC_93,Tier 1,Chennai,Tamil Nadu,South India,350948,4.21,3576,3044,3044,290,8.11,4.96,0.04,707813.17,197.93,9.71
+112,Pune_FC_112,Tier 1,Pune,Maharashtra,West India,268417,4.25,2361,2028,2028,174,7.37,4.9,0.03,466869.07,197.74,9.77
+45,Kolkata_FC_45,Tier 2,Kolkata,West Bengal,East India,151450,4.64,7375,6226,6226,607,8.23,4.97,0.05,1455866.89,197.41,9.72
+64,Delhi_FC_64,Tier 1,Delhi,Delhi,North India,269197,4.49,5306,4489,4489,435,8.2,4.96,0.04,1037034.55,195.45,9.79
+99,Chennai_FC_99,Tier 1,Chennai,Tamil Nadu,South India,491620,4.04,3559,3027,3027,287,8.06,4.99,0.04,699999.16,196.68,9.74
+108,Bangalore_FC_108,Tier 1,Bangalore,Karnataka,South India,283170,3.9,3509,2956,2956,283,8.06,4.92,0.03,700844.31,199.73,9.68
+15,Delhi_FC_15,Tier 1,Delhi,Delhi,North India,390339,4.35,5190,4389,4389,417,8.03,4.97,0.05,1021106.99,196.75,9.73
+55,Bangalore_FC_55,Tier 1,Bangalore,Karnataka,South India,371270,4.82,3567,3030,3030,277,7.77,4.93,0.05,710420.0,199.16,9.7
+84,Jaipur_FC_84,Tier 2,Jaipur,Rajasthan,North India,160117,4.11,5153,4351,4351,448,8.69,4.96,0.06,1009392.72,195.88,9.73
+6,Ahmedabad_FC_6,Tier 2,Ahmedabad,Gujarat,West India,170684,4.95,2326,2010,2010,157,6.75,4.92,0.01,457650.85,196.75,9.69
+70,Pune_FC_70,Tier 1,Pune,Maharashtra,West India,374103,4.09,2348,1983,1983,189,8.05,5.07,0.04,479782.12,204.34,9.48
+54,Delhi_FC_54,Tier 1,Delhi,Delhi,North India,546306,4.27,5160,4325,4325,412,7.98,4.96,0.04,1005544.2,194.87,9.76
+103,Mumbai_FC_103,Tier 1,Mumbai,Maharashtra,West India,311801,4.18,2399,2019,2019,196,8.17,4.93,0.06,471934.41,196.72,9.78
+59,Indore_FC_59,Tier 2,Indore,Madhya Pradesh,Central India,119032,4.82,4450,3783,3783,356,8.0,4.91,0.05,865006.42,194.38,9.83
+23,Jaipur_FC_23,Tier 2,Jaipur,Rajasthan,North India,128080,4.83,5211,4398,4398,427,8.19,5.06,0.04,1032563.84,198.15,9.67
+86,Mumbai_FC_86,Tier 1,Mumbai,Maharashtra,West India,473926,4.35,2431,2050,2050,210,8.64,4.98,0.05,477205.53,196.3,9.75
+52,Ahmedabad_FC_52,Tier 2,Ahmedabad,Gujarat,West India,247439,4.94,2288,1922,1922,199,8.7,5.02,0.06,450262.07,196.79,9.71
+44,Delhi_FC_44,Tier 1,Delhi,Delhi,North India,449188,3.99,5131,4323,4323,432,8.42,5.0,0.05,1011036.73,197.04,9.7
+33,Ahmedabad_FC_33,Tier 2,Ahmedabad,Gujarat,West India,248884,4.75,2358,1990,1990,201,8.52,4.93,0.05,466347.53,197.77,9.72
+62,Hyderabad_FC_62,Tier 1,Hyderabad,Telangana,South India,362477,4.2,3576,3008,3008,312,8.72,4.94,0.05,723368.61,202.28,9.65

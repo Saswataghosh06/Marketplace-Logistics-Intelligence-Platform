@@ -1,0 +1,2 @@
+total_shipments,delivered_shipments,breached_shipments,on_time_shipments,breach_rate_pct,total_shipping_cost,breached_shipping_cost,on_time_shipping_cost,breached_cost_pct,avg_shipping_cost,avg_breached_shipping_cost,avg_on_time_shipping_cost,avg_transit_days,avg_delay_days
+500000,423354,39858,423354,7.97,98629289.45,7820309.41,83523712.39,7.93,197.26,196.2,197.29,4.97,0.04

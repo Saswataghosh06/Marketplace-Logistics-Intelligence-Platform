@@ -1,0 +1,6 @@
+customer_region,total_shipments,delivered_shipments,on_time_shipments,sla_breached_shipments,sla_breach_pct,avg_transit_days,avg_delay_days,total_shipping_cost,avg_shipping_cost,shipping_cost_per_kg
+West India,76642,64874,64874,6154,8.03,4.96,0.05,15101192.92,197.04,9.73
+North India,130228,110276,110276,10383,7.97,4.97,0.04,25660754.84,197.04,9.73
+East India,104439,88400,88400,8305,7.95,4.97,0.04,20642443.49,197.65,9.71
+South India,130973,110997,110997,10414,7.95,4.97,0.04,25851773.52,197.38,9.72
+Central India,50218,42489,42489,3968,7.9,5.0,0.04,9896073.33,197.06,9.72
