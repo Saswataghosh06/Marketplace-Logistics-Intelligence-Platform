@@ -68,3 +68,36 @@ models:
       - name: total_shipments
         tests:
           - not_null    
+
+  - name: mart_seller_performance
+
+    columns:
+
+      - name: seller_id
+        tests:
+          - not_null
+          - unique
+
+      - name: seller_name
+        tests:
+          - not_null
+
+      - name: seller_tier
+        tests:
+          - not_null
+
+      - name: total_order_items
+        tests:
+          - not_null
+
+      - name: total_revenue
+        tests:
+          - not_null
+
+      - name: total_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
+        tests:
+          - not_null
