@@ -101,3 +101,24 @@ models:
       - name: sla_breach_pct
         tests:
           - not_null
+          
+
+  - name: mart_financial_impact
+
+    columns:
+
+      - name: total_shipments
+        tests:
+          - not_null
+
+      - name: total_shipping_cost
+        tests:
+          - not_null
+
+      - name: breached_shipping_cost
+        tests:
+          - not_null
+
+      - name: breach_rate_pct
+        tests:
+          - not_null
