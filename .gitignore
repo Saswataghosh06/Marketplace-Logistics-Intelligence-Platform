@@ -3,7 +3,7 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-
+*.pyo
 # Environment files
 .env
 .python-version
