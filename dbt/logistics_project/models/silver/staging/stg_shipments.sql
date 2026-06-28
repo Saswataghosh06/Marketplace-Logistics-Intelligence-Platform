@@ -1,20 +1,28 @@
 select
+
     shipment_id,
+
     order_id,
 
     shipment_weight_kg,
 
-    city,
-    state,
-    country,
-    customer_region,
+    trim(city) as city,
+
+    trim(state) as state,
+
+    trim(country) as country,
+
+    trim(customer_region) as customer_region,
 
     cast(warehouse_id as bigint) as warehouse_id,
 
     carrier_id,
-    carrier_name,
-    carrier_tier,
-    service_type,
+
+    trim(carrier_name) as carrier_name,
+
+    trim(carrier_tier) as carrier_tier,
+
+    trim(service_type) as service_type,
 
     sla_target_pct,
 
@@ -34,9 +42,10 @@ select
 
     case
         when sla_breach_flag = 1 then true
-        else false
+        when sla_breach_flag = 0 then false
+        else null
     end as is_sla_breached,
 
-    shipment_status
+    trim(shipment_status) as shipment_status
 
-from {{ source('bronze', 'fact_shipments') }}
+from {{ source('bronze','fact_shipments') }}

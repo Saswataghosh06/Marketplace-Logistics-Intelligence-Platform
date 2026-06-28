@@ -1,15 +1,18 @@
 select
+
     order_item_id,
 
     order_id,
 
     cast(product_id as bigint) as product_id,
 
-    seller_id,
+    cast(seller_id as bigint) as seller_id,
 
-    category,
-    subcategory,
-    brand,
+    trim(category) as category,
+
+    trim(subcategory) as subcategory,
+
+    trim(brand) as brand,
 
     unit_cost,
 
@@ -21,4 +24,4 @@ select
 
     cast(created_at as timestamp) as created_at
 
-from {{ source('bronze', 'fact_order_items') }}
+from {{ source('bronze','fact_order_items') }}

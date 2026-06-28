@@ -1,0 +1,41 @@
+version: 2
+
+models:
+
+  - name: stg_orders
+    description: Cleaned staging model for orders.
+
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_order_items
+    description: Cleaned staging model for order items.
+
+    columns:
+      - name: order_item_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_shipments
+    description: Cleaned staging model for shipments.
+
+    columns:
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_tracking_events
+    description: Cleaned staging model for shipment tracking events.
+
+    columns:
+      - name: tracking_event_id
+        tests:
+          - unique
+          - not_null
+
+  

@@ -1,23 +1,36 @@
 select
 
-    order_id,
-    customer_sk,
-    customer_id,
-    order_date,
+    o.order_id,
 
-    order_status,
-    payment_method,
-    currency_code,
+    coalesce(c.customer_sk, -1) as customer_sk,
 
-    order_amount,
-    shipping_fee,
-    discount_amount,
-    net_amount,
+    o.customer_id,
 
-    city,
-    state,
-    country,
+    o.order_date,
 
-    created_at
+    extract(year from o.order_date) as order_year,
+    extract(month from o.order_date) as order_month,
 
-from {{ ref('stg_orders') }}
+    trim(o.order_status) as order_status,
+    trim(o.payment_method) as payment_method,
+
+    o.currency_code,
+
+    o.order_amount,
+    o.shipping_fee,
+    o.discount_amount,
+    o.net_amount,
+
+    nullif(trim(o.city), '') as city,
+    nullif(trim(o.state), '') as state,
+    nullif(trim(o.country), '') as country,
+
+    o.created_at
+
+from {{ ref('stg_orders') }} o
+
+left join {{ ref('dim_customers') }} c
+    on o.customer_id = c.customer_id
+   and c.is_current = true
+
+where o.order_date <= current_date

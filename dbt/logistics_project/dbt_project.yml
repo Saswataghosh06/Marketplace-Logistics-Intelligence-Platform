@@ -17,9 +17,6 @@ clean-targets:
 models:
   logistics_project:
 
-    bronze:
-      +materialized: view
-
     silver:
       +materialized: table
 
@@ -38,5 +35,4 @@ models:
       marts:
         +schema: gold
 
-      metrics:
-        +schema: gold
+    

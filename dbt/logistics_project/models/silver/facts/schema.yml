@@ -1,0 +1,246 @@
+version: 2
+
+models:
+
+  - name: fct_orders
+    description: Order level transactional fact table.
+
+    columns:
+
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_sk
+
+      - name: order_date
+        tests:
+          - not_null
+
+      - name: order_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Delivered
+                  - In Transit
+                  - Cancelled
+                  - Returned
+                  - RTO
+                  - Lost
+
+      - name: payment_method
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - UPI
+                  - Credit Card
+                  - Debit Card
+                  - COD
+                  - Net Banking
+                  - Wallet
+
+      - name: currency_code
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - INR
+                  - USD
+                  - EUR
+                  - AED
+                  - GBP
+                  - SGD
+
+      - name: order_amount
+        tests:
+          - not_null
+
+      - name: shipping_fee
+        tests:
+          - not_null
+
+      - name: discount_amount
+        tests:
+          - not_null
+
+      - name: net_amount
+        tests:
+          - not_null
+
+  - name: fct_order_items
+    description: Line item level order fact table.
+
+    columns:
+
+      - name: order_item_id
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: product_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+              config:
+                where: "product_id is not null"
+
+      - name: seller_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_id
+              config:
+                where: "seller_id is not null"
+
+      - name: quantity
+        tests:
+          - not_null
+
+      - name: unit_cost
+        tests:
+          - not_null
+
+      - name: unit_price
+        tests:
+          - not_null
+
+      - name: line_amount
+        tests:
+          - not_null
+
+      - name: created_at
+        tests:
+          - not_null
+
+  - name: fct_shipments
+    description: Shipment level logistics fact table.
+
+    columns:
+
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: warehouse_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_warehouses')
+                field: warehouse_id
+              config:
+                where: "warehouse_id is not null"
+
+      - name: carrier_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_carriers')
+                field: carrier_id
+
+      - name: dispatch_date
+        tests:
+          - not_null
+
+      - name: shipping_cost
+        tests:
+          - not_null
+
+      - name: shipment_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Delivered
+                  - In Transit
+                  - Pending
+                  - Delayed
+
+  - name: fct_tracking_events
+    description: Shipment tracking event fact table.
+
+    columns:
+
+      - name: tracking_event_id
+        tests:
+          - unique
+          - not_null
+
+      - name: shipment_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_shipments')
+                field: shipment_id
+
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: carrier_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_carriers')
+                field: carrier_id
+
+      - name: event_timestamp
+        tests:
+          - not_null
+
+      - name: created_at
+        tests:
+          - not_null
+
+    
+                
+      - name: event_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Success
+                  - Pending
+                  - In Progress
+                  - Exception
+
