@@ -136,7 +136,7 @@ Synthetic Data Generation
    Bronze Layer (Parquet Files)
             │
             ▼
-      DuckDB Data Warehouse
+      SnowFlake Data Warehouse
             │
             ▼
      dbt Transformation Layer
