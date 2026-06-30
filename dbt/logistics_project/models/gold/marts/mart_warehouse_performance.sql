@@ -1,14 +1,44 @@
-with shipments as (
+{{ config(
+    materialized = 'table'
+) }}
 
-    select *
-    from {{ ref('fct_shipments') }}
+with warehouse_dim as (
+
+    select
+
+        warehouse_id,
+        warehouse_name,
+        warehouse_type,
+
+        city,
+        state,
+        region,
+
+        capacity_units,
+        warehouse_rating
+
+    from {{ ref('dim_warehouses') }}
 
 ),
 
-warehouses as (
+shipment_base as (
 
-    select *
-    from {{ ref('dim_warehouses') }}
+    select
+
+        warehouse_id,
+
+        shipment_status,
+        is_sla_breached,
+
+        actual_transit_days,
+        delay_days,
+
+        shipping_cost,
+        shipment_weight_kg
+
+    from {{ ref('fct_shipments') }}
+
+    where warehouse_id is not null
 
 ),
 
@@ -16,90 +46,167 @@ warehouse_metrics as (
 
     select
 
-        s.warehouse_id,
-        w.warehouse_name,
-        w.warehouse_type,
-        w.city,
-        w.state,
-        w.region,
-        w.capacity_units,
-        w.warehouse_rating,
+        warehouse_id,
 
         count(*) as total_shipments,
 
-        sum(
-            case
-                when s.shipment_status = 'Delivered'
-                then 1
-                else 0
-            end
+        count_if(
+            shipment_status = 'Delivered'
         ) as delivered_shipments,
 
-        sum(
-            case
-                when s.is_sla_breached = false
-                     and s.shipment_status = 'Delivered'
-                then 1
-                else 0
-            end
+        count_if(
+
+            shipment_status = 'Delivered'
+            and is_sla_breached = false
+
         ) as on_time_shipments,
 
-        sum(
-            case
-                when s.is_sla_breached = true
-                then 1
-                else 0
-            end
+        count_if(
+            is_sla_breached
         ) as sla_breached_shipments,
 
         round(
-            100.0 *
-            sum(
-                case
-                    when s.is_sla_breached = true
-                    then 1
-                    else 0
-                end
-            )
-            / count(*),
+
+            100.0
+            * count_if(is_sla_breached)
+
+            /
+
+            nullif(count(*),0),
+
             2
+
         ) as sla_breach_pct,
 
-        round(avg(s.actual_transit_days), 2) as avg_transit_days,
+        round(
 
-        round(avg(s.delay_days), 2) as avg_delay_days,
+            avg(
 
-        round(sum(s.shipping_cost), 2) as total_shipping_cost,
+                case
 
-        round(avg(s.shipping_cost), 2) as avg_shipping_cost,
+                    when shipment_status = 'Delivered'
+
+                    then actual_transit_days
+
+                end
+
+            ),
+
+            2
+
+        ) as avg_transit_days,
 
         round(
-            sum(s.shipping_cost)
-            /
-            nullif(sum(s.shipment_weight_kg), 0),
+
+            avg(
+
+                case
+
+                    when shipment_status = 'Delivered'
+
+                    then delay_days
+
+                end
+
+            ),
+
             2
+
+        ) as avg_delay_days,
+
+        round(
+
+            sum(shipping_cost),
+
+            2
+
+        ) as total_shipping_cost,
+
+        round(
+
+            avg(shipping_cost),
+
+            2
+
+        ) as avg_shipping_cost,
+
+        round(
+
+            sum(shipping_cost)
+
+            /
+
+            nullif(sum(shipment_weight_kg),0),
+
+            2
+
         ) as shipping_cost_per_kg
 
-    from shipments s
+    from shipment_base
 
-    left join warehouses w
-        on s.warehouse_id = w.warehouse_id
-
-    where s.warehouse_id is not null
-
-    group by
-
-        s.warehouse_id,
-        w.warehouse_name,
-        w.warehouse_type,
-        w.city,
-        w.state,
-        w.region,
-        w.capacity_units,
-        w.warehouse_rating
+    group by warehouse_id
 
 )
 
-select *
+select
 
-from warehouse_metrics
+    d.warehouse_id,
+
+    d.warehouse_name,
+    d.warehouse_type,
+
+    d.city,
+    d.state,
+    d.region,
+
+    d.capacity_units,
+    d.warehouse_rating,
+
+    coalesce(m.total_shipments,0)
+        as total_shipments,
+
+    coalesce(m.delivered_shipments,0)
+        as delivered_shipments,
+
+    coalesce(m.on_time_shipments,0)
+        as on_time_shipments,
+
+    coalesce(m.sla_breached_shipments,0)
+        as sla_breached_shipments,
+
+    coalesce(m.sla_breach_pct,0)
+        as sla_breach_pct,
+
+    coalesce(m.avg_transit_days,0)
+        as avg_transit_days,
+
+    coalesce(m.avg_delay_days,0)
+        as avg_delay_days,
+
+    coalesce(m.total_shipping_cost,0)
+        as total_shipping_cost,
+
+    coalesce(m.avg_shipping_cost,0)
+        as avg_shipping_cost,
+
+    coalesce(m.shipping_cost_per_kg,0)
+        as shipping_cost_per_kg,
+
+    round(
+
+        100.0
+        * coalesce(m.total_shipments,0)
+
+        /
+
+        nullif(d.capacity_units,0),
+
+        2
+
+    ) as warehouse_utilization_pct
+
+from warehouse_dim d
+
+left join warehouse_metrics m
+
+    on d.warehouse_id = m.warehouse_id

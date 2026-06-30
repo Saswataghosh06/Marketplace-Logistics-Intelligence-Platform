@@ -1,140 +1,195 @@
 {{ config(
-    materialized='table'
+    materialized = 'table'
 ) }}
 
-with valid_orders as (
+with calendar as (
 
-    select *
-    from {{ ref('fct_orders') }}
-    where order_date <= current_date
+    select
+
+        date_key,
+        cast(full_date as date) as full_date,
+
+        year,
+        quarter,
+        month,
+        month_name,
+        week_of_year
+
+    from {{ ref('dim_date') }}
 
 ),
 
-order_metrics as (
+orders as (
 
     select
 
         order_date,
 
-        count(distinct order_id) as total_orders,
+        count(distinct order_id)
+            as total_orders,
 
-        count(
-            distinct case
-                when order_status = 'Delivered'
-                then order_id
-            end
+        count_if(
+            order_status = 'Delivered'
         ) as delivered_orders,
 
-        sum(order_amount) as gross_revenue,
+        round(
+            sum(order_amount),
+            2
+        ) as gross_revenue,
 
-        sum(net_amount) as net_revenue,
+        round(
+            sum(net_amount),
+            2
+        ) as net_revenue,
 
-        avg(net_amount) as avg_order_value
+        round(
+            avg(net_amount),
+            2
+        ) as avg_order_value
 
-    from valid_orders
+    from {{ ref('fct_orders') }}
+
+    where order_date <= current_date
+
     group by order_date
 
 ),
 
-valid_shipments as (
-
-    select *
-    from {{ ref('fct_shipments') }}
-    where warehouse_id is not null
-      and actual_delivery_date <= current_date
-
-),
-
-shipment_metrics as (
+shipments as (
 
     select
 
-        dispatch_date as shipment_date,
+        dispatch_date,
 
-        count(distinct shipment_id) as total_shipments,
+        count(distinct shipment_id)
+            as total_shipments,
 
-        count(
-            case
-                when shipment_status = 'Delivered'
-                then 1
-            end
+        count_if(
+            shipment_status = 'Delivered'
         ) as delivered_shipments,
 
-        count(
-            case
-                when shipment_status = 'Delivered'
-                 and is_sla_breached = false
-                then 1
-            end
+        count_if(
+
+            shipment_status = 'Delivered'
+            and is_sla_breached = false
+
         ) as on_time_shipments,
 
-        count(
-            case
-                when is_sla_breached = true
-                then 1
-            end
+        count_if(
+            is_sla_breached
         ) as sla_breach_shipments,
 
         round(
+
             100.0 *
-            count(
-                case
-                    when is_sla_breached = true
-                    then 1
-                end
-            )
+
+            count_if(is_sla_breached)
+
             /
-            nullif(count(distinct shipment_id),0),
+
+            nullif(
+                count(distinct shipment_id),
+                0
+            ),
+
             2
+
         ) as sla_breach_pct,
 
-        sum(shipping_cost) as shipping_cost,
+        round(
+            sum(shipping_cost),
+            2
+        ) as shipping_cost,
 
-        avg(shipping_cost) as avg_shipping_cost,
+        round(
+            avg(shipping_cost),
+            2
+        ) as avg_shipping_cost,
 
-        avg(actual_transit_days) as avg_transit_days,
+        round(
+            avg(
+                actual_transit_days
+            ),
+            2
+        ) as avg_transit_days,
 
-        avg(delay_days) as avg_delay_days
+        round(
+            avg(
+                delay_days
+            ),
+            2
+        ) as avg_delay_days
 
-    from valid_shipments
+    from {{ ref('fct_shipments') }}
+
+    where
+
+        dispatch_date <= current_date
+        and warehouse_id is not null
+
     group by dispatch_date
 
 )
 
 select
 
-    d.date_key,
-    cast(d.full_date as date) as full_date,
-    d.year,
-    d.quarter,
-    d.month,
-    d.month_name,
-    d.week_of_year,
+    c.date_key,
+    c.full_date,
 
-    coalesce(o.total_orders,0) as total_orders,
-    coalesce(o.delivered_orders,0) as delivered_orders,
+    c.year,
+    c.quarter,
+    c.month,
+    c.month_name,
+    c.week_of_year,
 
-    coalesce(o.gross_revenue,0) as gross_revenue,
-    coalesce(o.net_revenue,0) as net_revenue,
-    coalesce(o.avg_order_value,0) as avg_order_value,
+    coalesce(o.total_orders,0)
+        as total_orders,
 
-    coalesce(s.total_shipments,0) as total_shipments,
-    coalesce(s.delivered_shipments,0) as delivered_shipments,
-    coalesce(s.on_time_shipments,0) as on_time_shipments,
+    coalesce(o.delivered_orders,0)
+        as delivered_orders,
 
-    coalesce(s.shipping_cost,0) as shipping_cost,
-    coalesce(s.avg_shipping_cost,0) as avg_shipping_cost,
+    coalesce(o.gross_revenue,0)
+        as gross_revenue,
 
-    coalesce(s.sla_breach_shipments,0) as sla_breach_shipments,
-    coalesce(s.sla_breach_pct,0) as sla_breach_pct,
+    coalesce(o.net_revenue,0)
+        as net_revenue,
 
-    coalesce(s.avg_transit_days,0) as avg_transit_days,
-    coalesce(s.avg_delay_days,0) as avg_delay_days
+    coalesce(o.avg_order_value,0)
+        as avg_order_value,
 
-from {{ ref('dim_date') }} d
+    coalesce(s.total_shipments,0)
+        as total_shipments,
 
-left join order_metrics o
-    on cast(d.full_date as date) = o.order_date
+    coalesce(s.delivered_shipments,0)
+        as delivered_shipments,
 
-left join shipment_metrics s
-    on cast(d.full_date as date) = s.shipment_date
+    coalesce(s.on_time_shipments,0)
+        as on_time_shipments,
+
+    coalesce(s.sla_breach_shipments,0)
+        as sla_breach_shipments,
+
+    coalesce(s.sla_breach_pct,0)
+        as sla_breach_pct,
+
+    coalesce(s.shipping_cost,0)
+        as shipping_cost,
+
+    coalesce(s.avg_shipping_cost,0)
+        as avg_shipping_cost,
+
+    coalesce(s.avg_transit_days,0)
+        as avg_transit_days,
+
+    coalesce(s.avg_delay_days,0)
+        as avg_delay_days
+
+from calendar c
+
+left join orders o
+
+    on c.full_date = o.order_date
+
+left join shipments s
+
+    on c.full_date = s.dispatch_date

@@ -1,71 +1,134 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized = 'table'
+) }}
 
-select
+with shipment_base as (
 
-    carrier_id,
-    carrier_name,
-    carrier_tier,
+    select
 
-    count(*) as total_shipments,
+        carrier_id,
+        carrier_name,
+        carrier_tier,
 
-    sum(
-        case
-            when shipment_status = 'Delivered'
-            then 1
-            else 0
-        end
-    ) as delivered_shipments,
+        shipment_status,
+        shipping_cost,
+        shipment_weight_kg,
 
-    sum(
-        case
-            when is_sla_breached = false
-            then 1
-            else 0
-        end
-    ) as on_time_shipments,
+        actual_transit_days,
+        delay_days,
+        is_sla_breached
 
-    sum(
-        case
-            when is_sla_breached = true
-            then 1
-            else 0
-        end
-    ) as sla_breached_shipments,
+    from {{ ref('fct_shipments') }}
 
-    round(
-        100.0 *
-        sum(
-            case
-                when is_sla_breached = true
-                then 1
-                else 0
-            end
-        ) / count(*),
-        2
-    ) as sla_breach_pct,
+    where carrier_id is not null
 
-    round(avg(actual_transit_days),2) as avg_transit_days,
+),
 
-    round(avg(delay_days),2) as avg_delay_days,
+carrier_metrics as (
 
-    round(sum(shipping_cost),2) as total_shipping_cost,
+    select
 
-    round(avg(shipping_cost),2) as avg_shipping_cost,
+        carrier_id,
+        carrier_name,
+        carrier_tier,
 
-    round(
-        sum(shipping_cost)
-        / nullif(sum(shipment_weight_kg),0),
-        2
-    ) as shipping_cost_per_kg
+        count(*) as total_shipments,
 
-from {{ ref('fct_shipments') }}
+        count_if(shipment_status = 'Delivered')
+            as delivered_shipments,
 
-where
-    carrier_id is not null
-    and shipment_status = 'Delivered'
+        count_if(
+            shipment_status = 'Delivered'
+            and is_sla_breached = false
+        ) as on_time_shipments,
 
-group by
+        count_if(is_sla_breached)
+            as sla_breached_shipments,
 
-    carrier_id,
-    carrier_name,
-    carrier_tier
+        round(
+
+            100.0
+            * count_if(is_sla_breached)
+            / nullif(count(*),0),
+
+            2
+
+        ) as sla_breach_pct,
+
+        round(
+
+            avg(
+
+                case
+
+                    when shipment_status = 'Delivered'
+
+                    then actual_transit_days
+
+                end
+
+            ),
+
+            2
+
+        ) as avg_transit_days,
+
+        round(
+
+            avg(
+
+                case
+
+                    when shipment_status = 'Delivered'
+
+                    then delay_days
+
+                end
+
+            ),
+
+            2
+
+        ) as avg_delay_days,
+
+        round(
+
+            sum(shipping_cost),
+
+            2
+
+        ) as total_shipping_cost,
+
+        round(
+
+            avg(shipping_cost),
+
+            2
+
+        ) as avg_shipping_cost,
+
+        round(
+
+            sum(shipping_cost)
+
+            /
+
+            nullif(sum(shipment_weight_kg),0),
+
+            2
+
+        ) as shipping_cost_per_kg
+
+    from shipment_base
+
+    group by
+
+        carrier_id,
+        carrier_name,
+        carrier_tier
+
+)
+
+select *
+
+from carrier_metrics

@@ -1,0 +1,2 @@
+total_shipments,delivered_shipments,on_time_shipments,sla_breached_shipments,sla_breach_pct,avg_transit_days,avg_delay_days,total_shipping_cost,avg_shipping_cost,breached_shipping_cost,on_time_shipping_cost,breached_cost_pct,avg_breached_shipping_cost,avg_on_time_shipping_cost,shipping_cost_per_kg
+499500,420235,386633,34811,6.97,4.92,-0.0,98571097.63,197.34,6884474.36,76260515.78,6.98,197.77,197.24,9.72

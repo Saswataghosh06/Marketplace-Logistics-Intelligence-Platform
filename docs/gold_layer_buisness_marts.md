@@ -1,278 +1,381 @@
-# GOLD_LAYER_BUSINESS_MARTS
+# DATA_QUALITY_REPORT.md
 
-## Project
+# Marketplace Logistics Intelligence Platform
 
-Marketplace Logistics Intelligence Platform
+## Data Quality and Governance Report
 
 ---
 
 # Purpose
 
-The Gold layer contains business-ready marts designed for reporting, KPI monitoring, and root cause analysis.
+This document describes the data quality strategy implemented throughout the Marketplace Logistics Intelligence Platform.
 
-Unlike the Silver layer, Gold models represent trusted business metrics that can be consumed directly by BI tools such as Power BI.
+Rather than forcing every dataset to become perfectly clean, the project follows an enterprise data governance approach where operational data is preserved while business reporting is governed through layered transformations.
 
-Each mart answers a specific business problem identified by logistics leadership.
+The objective is to balance:
 
----
-
-# Gold Mart Overview
-
-| Gold Mart | Business Objective |
-|------------|--------------------|
-| mart_logistics_overview | Executive logistics KPI dashboard |
-| mart_carrier_performance | Evaluate carrier SLA performance |
-| mart_warehouse_performance | Identify warehouse bottlenecks |
-| mart_region_performance | Analyze regional delivery performance |
-| mart_seller_performance | Measure seller logistics performance |
-| mart_financial_impact | Quantify financial impact of logistics operations |
+* Operational traceability
+* Historical accuracy
+* Data quality transparency
+* Trusted business reporting
 
 ---
 
-# 1. mart_logistics_overview
+# Data Quality Philosophy
 
-## Business Question
+Production systems rarely contain perfect data.
 
-How is the logistics network performing overall?
+Operational platforms often contain:
 
-## Primary Users
+* Missing master data
+* Late arriving records
+* Duplicate events
+* Invalid references
+* Future dated transactions
+* Incomplete operational updates
 
-• Operations Leadership
+Instead of deleting these records, enterprise data warehouses preserve them for auditing while ensuring that executive KPIs remain reliable.
 
-• Supply Chain Managers
-
-• Executive Dashboard
-
-## Key KPIs
-
-• Total Orders
-
-• Total Shipments
-
-• Delivered Shipments
-
-• SLA Breach %
-
-• Average Transit Days
-
-• Shipping Cost
-
-• Delivery Trend
+This project follows the same philosophy.
 
 ---
 
-# 2. mart_carrier_performance
+# Layer Responsibilities
 
-## Business Question
+## Bronze Layer
 
-Which carriers contribute most to SLA breaches?
+### Objective
 
-## Primary Users
+Preserve source data exactly as generated.
 
-• Logistics Operations
+### Characteristics
 
-• Carrier Management Team
+* No transformations
+* No filtering
+* No business rules
+* Immutable source layer
+* Complete historical traceability
 
-## Key KPIs
-
-• Total Shipments
-
-• Delivered Shipments
-
-• SLA Breach %
-
-• Average Transit Days
-
-• Average Delay
-
-• Shipping Cost
-
-• Cost per Kilogram
+Every generated record is retained regardless of quality.
 
 ---
 
-# 3. mart_warehouse_performance
+## Silver Layer
 
-## Business Question
+### Objective
 
-Which warehouses are creating dispatch bottlenecks?
+Standardize operational data while preserving business anomalies.
 
-## Primary Users
+Responsibilities include:
 
-• Warehouse Operations
+* Schema standardization
+* Data type enforcement
+* Business friendly naming
+* Surrogate key generation
+* Slowly Changing Dimensions
+* Referential integrity validation
+* Business rule implementation
 
-• Supply Chain Managers
-
-## Key KPIs
-
-• Total Shipments
-
-• Delivered Shipments
-
-• SLA Breach %
-
-• Average Transit Days
-
-• Average Delay
-
-• Shipping Cost
-
-• Shipping Cost per Kilogram
-
-Warehouse descriptive attributes are included to support operational reporting:
-
-• Warehouse Name
-
-• Warehouse Type
-
-• City
-
-• State
-
-• Region
-
-• Capacity
-
-• Warehouse Rating
+Known operational anomalies remain available for downstream investigation.
 
 ---
 
-# 4. mart_region_performance
+## Gold Layer
 
-## Business Question
+### Objective
 
-Which customer regions experience the highest delivery delays?
+Produce trusted business metrics.
 
-## Primary Users
+Gold models apply reporting specific business rules while preserving the underlying operational history in Silver.
 
-• Regional Operations
+Business users consume only Gold marts.
 
-• Logistics Planning
-
-## Key KPIs
-
-• Total Shipments
-
-• Delivered Shipments
-
-• SLA Breach %
-
-• Average Transit Days
-
-• Average Delay
-
-• Shipping Cost
-
-• Shipping Cost per Kilogram
+Operational investigations use Silver.
 
 ---
 
-# 5. mart_seller_performance
+# Data Quality Framework
 
-## Business Question
+```id="ewovju"
+Raw Operational Data
 
-Which sellers are most impacted by logistics performance?
+        │
 
-## Primary Users
+        ▼
 
-• Marketplace Operations
+Bronze
 
-• Seller Success Team
+Preserve Everything
 
-## Key KPIs
+        │
 
-Business
+        ▼
 
-• Total Revenue
+Silver
 
-• Total Quantity Sold
+Standardize
 
-• Average Order Item Value
+Validate
 
-Logistics
+Document
 
-• Total Shipments
+        │
 
-• Delivered Shipments
+        ▼
 
-• SLA Breach %
+Gold
 
-• Average Transit Days
+Govern
 
-• Average Delay
+Aggregate
 
-• Shipping Cost
-
-Seller profile attributes are included for business segmentation:
-
-• Seller Tier
-
-• Seller Region
-
-• Seller Category
-
-• Rating Score
+Report
+```
 
 ---
 
-# 6. mart_financial_impact
+# Data Quality Checks
 
-## Business Question
+The project implements automated validation using dbt tests.
 
-What is the financial impact of logistics performance?
+Validation categories include:
 
-## Primary Users
+## Structural Validation
 
-• Finance
+* Primary key uniqueness
+* Mandatory field validation
+* Data type consistency
 
-• Operations Leadership
+## Referential Integrity
 
-## Key KPIs
+Relationships between:
 
-• Total Shipping Cost
+* Orders and Customers
+* Orders and Sellers
+* Shipments and Carriers
+* Shipments and Warehouses
+* Order Items and Products
 
-• Breached Shipping Cost
+## Domain Validation
 
-• On Time Shipping Cost
+Accepted values for:
 
-• Breached Cost %
-
-• Average Shipping Cost
-
-• Average Breached Shipping Cost
-
-• Average Transit Days
-
-• Average Delay
-
----
-
-# Gold Layer Design Principles
-
-Every Gold mart follows the same design philosophy:
-
-• Business oriented
-
-• One business problem per mart
-
-• Aggregated metrics
-
-• Trusted KPI definitions
-
-• Optimized for reporting
-
-• Consistent naming conventions
-
-• Documented business logic
-
-• Directly consumable by Power BI
+* Shipment Status
+* Order Status
+* Payment Method
+* Carrier Tier
+* Customer Segment
+* Tracking Event Status
 
 ---
 
-# Relationship to Silver Layer
+# Intentional Operational Anomalies
 
-Silver models retain operational detail and known data quality anomalies.
+The synthetic dataset intentionally includes realistic operational issues.
 
-Gold marts aggregate validated business metrics while excluding records that would distort executive reporting when appropriate.
+These simulate production systems and create opportunities for root cause analysis.
 
-This separation preserves data lineage while ensuring reliable analytics.
+| Anomaly                      | Business Scenario                | Silver    | Gold                               |
+| ---------------------------- | -------------------------------- | --------- | ---------------------------------- |
+| Missing customer reference   | Delayed customer synchronization | Preserved | Excluded from customer KPIs        |
+| Missing warehouse assignment | Shipment not allocated           | Preserved | Excluded from warehouse reporting  |
+| Future dated orders          | Clock synchronization issues     | Preserved | Excluded from trend reporting      |
+| Future tracking events       | Event ingestion timing           | Preserved | Excluded from historical KPIs      |
+| Duplicate tracking events    | Event replay                     | Preserved | Aggregated appropriately           |
+| Missing product references   | Catalog synchronization          | Preserved | Excluded where required            |
+| Negative quantities          | Transaction correction           | Preserved | Excluded from revenue calculations |
+
+---
+
+# Slowly Changing Dimensions
+
+Historical accuracy is maintained through Slowly Changing Dimension Type 2.
+
+Implemented for:
+
+* Customers
+* Carriers
+
+Benefits include:
+
+* Historical reporting
+* Accurate KPI reconstruction
+* Auditability
+* Time aware analytics
+
+---
+
+# Data Quality Decisions
+
+## Customer Orphans
+
+Some orders intentionally reference customers that no longer exist in the current master dataset.
+
+Reason:
+
+Simulates delayed master data synchronization.
+
+Handling:
+
+* Retained in Silver
+* Excluded from customer performance KPIs
+* Documented through dbt relationship tests
+
+---
+
+## Missing Warehouse Assignments
+
+Some shipments have no warehouse allocation.
+
+Reason:
+
+Represents incomplete operational processing.
+
+Handling:
+
+* Preserved in Silver
+* Excluded from warehouse performance mart
+
+---
+
+## Future Dated Transactions
+
+Some operational timestamps occur after the current reporting date.
+
+Reason:
+
+Simulates timezone differences and delayed ingestion.
+
+Handling:
+
+* Preserved in Silver
+* Filtered from time based Gold KPIs
+
+---
+
+## Duplicate Tracking Events
+
+Multiple identical tracking events intentionally exist.
+
+Reason:
+
+Represents event replay commonly found in event driven architectures.
+
+Handling:
+
+* Preserved in Silver
+* Aggregated safely during reporting
+
+---
+
+## Invalid Product References
+
+Some order items intentionally reference missing products.
+
+Reason:
+
+Simulates catalog synchronization failures.
+
+Handling:
+
+* Preserved for auditing
+* Excluded from product level reporting
+
+---
+
+# Gold Layer Governance Rules
+
+Each Gold mart applies reporting specific business rules.
+
+| Gold Mart                  | Governance Rule                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| mart_logistics_overview    | Excludes future dated operational records                                         |
+| mart_carrier_performance   | Calculates transit metrics using delivered shipments                              |
+| mart_warehouse_performance | Excludes shipments without warehouse assignment                                   |
+| mart_region_performance    | Ignores unknown customer regions                                                  |
+| mart_seller_performance    | Prevents double counting through proportional shipment allocation                 |
+| mart_financial_impact      | Includes all shipment costs while separating breached and on time logistics spend |
+
+---
+
+# Validation Workflow
+
+Every transformation follows the same validation process.
+
+```id="vfhw4o"
+dbt Build
+
+        │
+
+        ▼
+
+Schema Tests
+
+        │
+
+        ▼
+
+Relationship Tests
+
+        │
+
+        ▼
+
+Business Validation Queries
+
+        │
+
+        ▼
+
+Gold KPI Verification
+
+        │
+
+        ▼
+
+Power BI Validation
+```
+
+---
+
+# Automated Testing
+
+The warehouse currently validates:
+
+* Primary key uniqueness
+* Foreign key relationships
+* Null constraints
+* Accepted values
+* Domain integrity
+* Historical dimension consistency
+
+All production models successfully pass automated dbt testing after governance rules are applied.
+
+---
+
+# Business Impact
+
+Separating operational quality from reporting quality provides several advantages.
+
+Operational teams can:
+
+* Investigate failures
+* Audit historical events
+* Trace upstream issues
+
+Business users receive:
+
+* Trusted KPIs
+* Consistent metrics
+* Accurate executive dashboards
+* Reliable decision support
+
+---
+
+# Summary
+
+The Marketplace Logistics Intelligence Platform follows enterprise data governance principles rather than simplistic data cleansing.
+
+Operational anomalies are intentionally preserved to maintain traceability, while business reporting is governed through layered transformations and validated KPI definitions.
+
+This approach reflects modern Analytics Engineering practices used in large scale production data warehouses where transparency, auditability, and business trust are equally important.

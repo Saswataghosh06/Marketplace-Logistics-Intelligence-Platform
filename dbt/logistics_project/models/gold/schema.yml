@@ -3,19 +3,51 @@ version: 2
 models:
 
   - name: mart_logistics_overview
+    description: Daily executive logistics KPI summary across orders and shipments.
 
     columns:
 
       - name: date_key
+        description: Surrogate key of the calendar date.
         tests:
           - unique
           - not_null
 
       - name: full_date
+        description: Calendar date.
+        tests:
+          - not_null
+
+      - name: total_orders
+        tests:
+          - not_null
+
+      - name: delivered_orders
+        tests:
+          - not_null
+
+      - name: gross_revenue
+        tests:
+          - not_null
+
+      - name: net_revenue
+        tests:
+          - not_null
+
+      - name: total_shipments
+        tests:
+          - not_null
+
+      - name: delivered_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
         tests:
           - not_null
 
   - name: mart_carrier_performance
+    description: Carrier level logistics performance and SLA metrics.
 
     columns:
 
@@ -28,11 +60,32 @@ models:
         tests:
           - not_null
 
+      - name: carrier_tier
+        tests:
+          - not_null
+
       - name: total_shipments
         tests:
           - not_null
 
+      - name: delivered_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
+        tests:
+          - not_null
+
+      - name: avg_transit_days
+        tests:
+          - not_null
+
+      - name: total_shipping_cost
+        tests:
+          - not_null
+
   - name: mart_warehouse_performance
+    description: Warehouse operational performance metrics.
 
     columns:
 
@@ -56,7 +109,21 @@ models:
       - name: total_shipments
         tests:
           - not_null
+
+      - name: delivered_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
+        tests:
+          - not_null
+
+      - name: warehouse_utilization_pct
+        tests:
+          - not_null
+
   - name: mart_region_performance
+    description: Regional shipment performance and logistics KPIs.
 
     columns:
 
@@ -67,16 +134,29 @@ models:
 
       - name: total_shipments
         tests:
-          - not_null    
+          - not_null
+
+      - name: delivered_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
+        tests:
+          - not_null
+
+      - name: total_shipping_cost
+        tests:
+          - not_null
 
   - name: mart_seller_performance
+    description: Seller sales and logistics performance summary.
 
     columns:
 
       - name: seller_id
         tests:
-          - not_null
           - unique
+          - not_null
 
       - name: seller_name
         tests:
@@ -87,6 +167,10 @@ models:
           - not_null
 
       - name: total_order_items
+        tests:
+          - not_null
+
+      - name: total_quantity_sold
         tests:
           - not_null
 
@@ -101,13 +185,29 @@ models:
       - name: sla_breach_pct
         tests:
           - not_null
-          
+
+      - name: avg_shipping_cost
+        tests:
+          - not_null
 
   - name: mart_financial_impact
+    description: Executive financial impact summary of logistics operations.
 
     columns:
 
       - name: total_shipments
+        tests:
+          - not_null
+
+      - name: delivered_shipments
+        tests:
+          - not_null
+
+      - name: sla_breached_shipments
+        tests:
+          - not_null
+
+      - name: sla_breach_pct
         tests:
           - not_null
 
@@ -119,6 +219,10 @@ models:
         tests:
           - not_null
 
-      - name: breach_rate_pct
+      - name: on_time_shipping_cost
+        tests:
+          - not_null
+
+      - name: breached_cost_pct
         tests:
           - not_null
