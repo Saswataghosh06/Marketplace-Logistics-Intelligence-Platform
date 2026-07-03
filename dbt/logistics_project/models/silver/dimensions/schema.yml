@@ -1,12 +1,9 @@
 version: 2
 
 models:
-
   - name: dim_carriers
     description: SCD Type 2 carrier dimension.
-
     columns:
-
       - name: carrier_sk
         tests:
           - unique
@@ -60,9 +57,7 @@ models:
 
   - name: dim_customers
     description: Customer SCD Type 2 dimension.
-
     columns:
-
       - name: customer_sk
         tests:
           - unique
@@ -113,9 +108,7 @@ models:
 
   - name: dim_date
     description: Calendar dimension.
-
     columns:
-
       - name: date_key
         tests:
           - unique
@@ -129,7 +122,6 @@ models:
       - name: year
         tests:
           - not_null
-
       - name: month
         tests:
           - not_null
@@ -144,9 +136,7 @@ models:
 
   - name: dim_products
     description: Product master dimension.
-
     columns:
-
       - name: product_id
         tests:
           - unique
@@ -180,7 +170,6 @@ models:
       - name: brand
         tests:
           - not_null
-
       - name: unit_cost
         tests:
           - not_null
@@ -191,9 +180,7 @@ models:
 
   - name: dim_sellers
     description: Seller master dimension.
-
     columns:
-
       - name: seller_id
         tests:
           - unique
@@ -231,9 +218,7 @@ models:
 
   - name: dim_warehouses
     description: Warehouse master dimension.
-
     columns:
-
       - name: warehouse_id
         tests:
           - unique
@@ -260,7 +245,7 @@ models:
       - name: capacity_units
         tests:
           - not_null
-
+          
       - name: warehouse_rating
         tests:
           - not_null

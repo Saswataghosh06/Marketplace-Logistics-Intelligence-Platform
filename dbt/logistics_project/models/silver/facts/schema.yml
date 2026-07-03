@@ -1,17 +1,14 @@
 version: 2
 
 models:
-
   - name: fct_orders
     description: Order level transactional fact table.
-
     columns:
-
       - name: order_id
         tests:
           - unique
           - not_null
-
+          
       - name: customer_sk
         tests:
           - not_null
@@ -23,7 +20,6 @@ models:
       - name: order_date
         tests:
           - not_null
-
       - name: order_status
         tests:
           - not_null
@@ -36,7 +32,7 @@ models:
                   - Returned
                   - RTO
                   - Lost
-
+                
       - name: payment_method
         tests:
           - not_null
@@ -81,9 +77,7 @@ models:
 
   - name: fct_order_items
     description: Line item level order fact table.
-
     columns:
-
       - name: order_item_id
         tests:
           - unique
@@ -137,9 +131,7 @@ models:
 
   - name: fct_shipments
     description: Shipment level logistics fact table.
-
     columns:
-
       - name: shipment_id
         tests:
           - unique
@@ -191,9 +183,7 @@ models:
 
   - name: fct_tracking_events
     description: Shipment tracking event fact table.
-
     columns:
-
       - name: tracking_event_id
         tests:
           - unique
@@ -222,7 +212,7 @@ models:
               arguments:
                 to: ref('dim_carriers')
                 field: carrier_id
-
+              
       - name: event_timestamp
         tests:
           - not_null
@@ -231,8 +221,6 @@ models:
         tests:
           - not_null
 
-    
-                
       - name: event_status
         tests:
           - not_null
@@ -243,4 +231,3 @@ models:
                   - Pending
                   - In Progress
                   - Exception
-

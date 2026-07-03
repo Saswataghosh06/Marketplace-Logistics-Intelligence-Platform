@@ -1,0 +1,14 @@
+logistics_project:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # This looks for the environment variable, defaults to Windows path if not found
+      path: "{{ env_var('DBT_DATABASE_PATH', 'D:/logistic_analytics_projects/warehouse/logistics.duckdb') }}"
+      threads: 4
+      
+    prod:
+      type: duckdb
+      # This looks for the environment variable, defaults to the Docker container path
+      path: "{{ env_var('DBT_DATABASE_PATH', '/opt/airflow/project/warehouse/logistics.duckdb') }}"
+      threads: 4
