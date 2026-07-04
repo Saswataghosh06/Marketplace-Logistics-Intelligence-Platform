@@ -8,56 +8,151 @@
 
 # Purpose
 
-This document defines the business meaning, ownership, and analytical purpose of every dataset in the Marketplace Logistics Intelligence Platform.
+This document defines the business meaning, ownership, and analytical purpose of every dataset used throughout the Marketplace Logistics Intelligence Platform.
 
-The data dictionary serves as the central metadata reference for analysts, analytics engineers, business stakeholders, and dashboard developers.
+The data dictionary acts as the central metadata reference for Analytics Engineers, Data Analysts, Business Stakeholders, and Dashboard Developers.
 
-Rather than documenting every technical column, this document focuses on business critical attributes that drive reporting, KPI calculations, and operational decision making.
+Rather than documenting every technical column, this document focuses on the business meaning of each dataset, its grain, ownership, measures, and relationships that support reporting, KPI calculations, and executive decision making.
+
+The data dictionary reflects the final Version 2 architecture of the project, which uses DuckDB as the analytical warehouse, dbt Core for transformations, Apache Airflow for orchestration, Docker Compose for deployment, and Gold Business Marts for dashboard visualization.
 
 ---
 
 # Warehouse Overview
 
-The warehouse follows a Medallion Architecture.
+The project follows a Medallion Architecture combined with dimensional modeling.
 
-| Layer  | Purpose                                 |
-| ------ | --------------------------------------- |
-| Bronze | Raw operational source data             |
-| Silver | Standardized dimensions and fact tables |
-| Gold   | Business ready analytical marts         |
+| Layer | Purpose |
+|------|---------------------------------------------|
+| Bronze | Immutable raw operational Parquet datasets |
+| DuckDB Bronze | Raw operational tables loaded by Python |
+| Silver | Staging models, dimensions, and fact tables |
+| Gold | Business-ready analytical marts |
+
+The complete ELT pipeline is orchestrated using Apache Airflow.
+
+```text
+Bronze Parquet Files
+
+        │
+
+        ▼
+
+load_bronze.py
+
+        │
+
+        ▼
+
+DuckDB Bronze Layer
+
+        │
+
+        ▼
+
+dbt debug
+
+        │
+
+        ▼
+
+dbt build
+
+        │
+
+        ▼
+
+Silver Warehouse
+
+        │
+
+        ▼
+
+Gold Business Marts
+
+        │
+
+        ▼
+
+export_gold_marts.py
+
+        │
+
+        ▼
+
+CSV Exports
+
+        │
+
+        ▼
+
+Dashboard Visualization
+```
 
 ---
 
 # Bronze Layer
 
-The Bronze layer preserves raw operational data exactly as generated.
+The Bronze layer contains immutable synthetic marketplace datasets stored as Parquet files.
 
-No business transformations are performed.
+These files simulate operational systems and serve as the ingestion source for DuckDB.
 
-## Bronze Tables
+The Bronze layer preserves all generated records exactly as produced without applying any business transformations.
 
-| Table           | Business Description            |
-| --------------- | ------------------------------- |
-| orders          | Raw customer order transactions |
-| order_items     | Raw purchased products          |
-| shipments       | Raw shipment lifecycle          |
-| tracking_events | Raw shipment tracking history   |
-| customers_scd   | Customer master history         |
-| carriers_scd    | Carrier master history          |
-| sellers         | Seller master data              |
-| warehouses      | Warehouse master data           |
-| products        | Product catalog                 |
-| date_dimension  | Calendar dimension              |
+Data ingestion into DuckDB is performed by:
+
+```text
+scripts/load_bronze.py
+```
+
+## Bronze Datasets
+
+| Dataset | Business Description |
+|----------|----------------------|
+| customers_scd | Customer master history with SCD Type 2 records |
+| carriers_scd | Carrier master history with SCD Type 2 records |
+| sellers | Marketplace seller master data |
+| products | Marketplace product catalog |
+| warehouses | Warehouse master data |
+| regions | Geographic delivery regions |
+| date_dimension | Calendar dimension |
+| orders | Customer order transactions |
+| order_items | Products purchased within each order |
+| shipments | Shipment lifecycle information |
+| tracking_events | Shipment tracking history |
 
 ---
 
 # Silver Layer
 
-The Silver layer contains standardized business entities used throughout the warehouse.
+The Silver layer represents the enterprise dimensional warehouse.
+
+It contains reusable business entities and transactional facts that support downstream analytics.
+
+The Silver layer is divided into three logical components.
+
+## Staging Models
+
+Purpose
+
+Standardize raw operational datasets before dimensional modeling.
+
+Responsibilities include:
+
+* Column renaming
+* Data type standardization
+* Business-friendly naming
+* Data validation
+* Initial cleansing
+* Schema consistency
 
 ---
 
-# Dimension Tables
+## Dimension Tables
+
+Dimension tables describe business entities used throughout the warehouse.
+
+They provide descriptive attributes for slicing, filtering, grouping, and historical reporting.
 
 ---
 
@@ -65,7 +160,7 @@ The Silver layer contains standardized business entities used throughout the war
 
 ## Business Purpose
 
-Stores customer master information while preserving historical profile changes through Slowly Changing Dimension Type 2.
+Stores customer master information while preserving historical profile changes using Slowly Changing Dimension Type 2.
 
 ## Grain
 
@@ -75,30 +170,30 @@ One row per customer version.
 
 customer_sk
 
-## Business Owner
-
-Customer Operations
-
 ## Source
 
 customers_scd
 
+## Business Owner
+
+Customer Operations
+
 ## Important Fields
 
-| Column           | Business Meaning                            |
-| ---------------- | ------------------------------------------- |
-| customer_sk      | Surrogate key used for historical reporting |
-| customer_id      | Stable business identifier                  |
-| customer_name    | Customer full name                          |
-| city             | Customer city                               |
-| state            | Customer state                              |
-| country          | Customer country                            |
-| customer_region  | Geographic reporting region                 |
-| customer_segment | Customer business segment                   |
-| signup_date      | Original registration date                  |
-| effective_from   | Record effective start                      |
-| effective_to     | Record effective end                        |
-| is_current       | Indicates latest customer version           |
+| Column | Business Meaning |
+|---------|------------------|
+| customer_sk | Historical surrogate key |
+| customer_id | Stable business identifier |
+| customer_name | Customer full name |
+| city | Customer city |
+| state | Customer state |
+| country | Customer country |
+| customer_region | Reporting geography |
+| customer_segment | Customer segment |
+| signup_date | Registration date |
+| effective_from | Record start date |
+| effective_to | Record end date |
+| is_current | Current customer version |
 
 ---
 
@@ -106,7 +201,7 @@ customers_scd
 
 ## Business Purpose
 
-Stores logistics carrier information and historical SLA configurations.
+Stores logistics carrier information and historical SLA configurations using Slowly Changing Dimension Type 2.
 
 ## Grain
 
@@ -120,19 +215,23 @@ carrier_sk
 
 carriers_scd
 
+## Business Owner
+
+Logistics Operations
+
 ## Important Fields
 
-| Column         | Business Meaning             |
-| -------------- | ---------------------------- |
-| carrier_sk     | Historical surrogate key     |
-| carrier_id     | Business carrier identifier  |
-| carrier_name   | Logistics provider           |
-| carrier_tier   | Service level classification |
-| service_type   | Delivery service type        |
-| sla_target_pct | Target SLA percentage        |
-| effective_from | Version start                |
-| effective_to   | Version end                  |
-| is_current     | Current carrier record       |
+| Column | Business Meaning |
+|---------|------------------|
+| carrier_sk | Historical surrogate key |
+| carrier_id | Stable carrier identifier |
+| carrier_name | Logistics provider |
+| carrier_tier | Service classification |
+| service_type | Delivery service |
+| sla_target_pct | Target SLA percentage |
+| effective_from | Version start |
+| effective_to | Version end |
+| is_current | Current carrier version |
 
 ---
 
@@ -140,7 +239,7 @@ carriers_scd
 
 ## Business Purpose
 
-Stores descriptive information about marketplace products.
+Stores descriptive product information used for sales, revenue, profitability, and seller analytics.
 
 ## Grain
 
@@ -150,23 +249,30 @@ One row per product.
 
 product_id
 
+## Source
+
+products
+
+## Business Owner
+
+Product Management
+
 ## Important Fields
 
-| Column       | Business Meaning      |
-| ------------ | --------------------- |
-| product_id   | Product identifier    |
-| product_name | Product name          |
-| category     | Product category      |
-| brand        | Manufacturer or brand |
-| unit_cost    | Procurement cost      |
+| Column | Business Meaning |
+|---------|------------------|
+| product_id | Product identifier |
+| product_name | Product name |
+| category | Product category |
+| brand | Product brand |
+| unit_cost | Procurement cost |
 
 ---
-
 # dim_sellers
 
 ## Business Purpose
 
-Stores seller profile information for marketplace performance reporting.
+Stores marketplace seller information used for operational, financial, and fulfillment performance reporting.
 
 ## Grain
 
@@ -176,16 +282,24 @@ One row per seller.
 
 seller_id
 
+## Source
+
+sellers
+
+## Business Owner
+
+Marketplace Operations
+
 ## Important Fields
 
-| Column          | Business Meaning          |
-| --------------- | ------------------------- |
-| seller_id       | Seller identifier         |
-| seller_name     | Seller name               |
-| seller_tier     | Marketplace tier          |
-| seller_region   | Seller operating region   |
+| Column | Business Meaning |
+|---------|------------------|
+| seller_id | Seller identifier |
+| seller_name | Marketplace seller |
+| seller_tier | Marketplace tier |
+| seller_region | Operating region |
 | seller_category | Primary business category |
-| rating_score    | Marketplace rating        |
+| rating_score | Marketplace seller rating |
 
 ---
 
@@ -193,7 +307,7 @@ seller_id
 
 ## Business Purpose
 
-Stores warehouse attributes used for logistics performance reporting.
+Stores warehouse attributes used for shipment routing, warehouse performance analysis, and fulfillment reporting.
 
 ## Grain
 
@@ -203,18 +317,59 @@ One row per warehouse.
 
 warehouse_id
 
+## Source
+
+warehouses
+
+## Business Owner
+
+Warehouse Operations
+
 ## Important Fields
 
-| Column           | Business Meaning                  |
-| ---------------- | --------------------------------- |
-| warehouse_id     | Warehouse identifier              |
-| warehouse_name   | Warehouse name                    |
-| warehouse_type   | Fulfillment center classification |
-| city             | Warehouse city                    |
-| state            | Warehouse state                   |
-| region           | Geographic region                 |
-| capacity_units   | Maximum storage capacity          |
-| warehouse_rating | Operational rating                |
+| Column | Business Meaning |
+|---------|------------------|
+| warehouse_id | Warehouse identifier |
+| warehouse_name | Warehouse name |
+| warehouse_type | Fulfillment center type |
+| city | Warehouse city |
+| state | Warehouse state |
+| region | Warehouse region |
+| capacity_units | Storage capacity |
+| warehouse_rating | Operational rating |
+
+---
+
+# dim_regions
+
+## Business Purpose
+
+Stores standardized geographical regions used for regional logistics and delivery performance analysis.
+
+## Grain
+
+One row per region.
+
+## Primary Key
+
+region_id
+
+## Source
+
+regions
+
+## Business Owner
+
+Logistics Strategy
+
+## Important Fields
+
+| Column | Business Meaning |
+|---------|------------------|
+| region_id | Region identifier |
+| region_name | Business reporting region |
+| country | Country |
+| zone | Operational zone |
 
 ---
 
@@ -222,31 +377,46 @@ warehouse_id
 
 ## Business Purpose
 
-Provides a reusable calendar dimension for time based analysis.
+Provides a reusable calendar dimension for time based reporting across all business processes.
 
 ## Grain
 
-One row per calendar day.
+One row per calendar date.
 
 ## Primary Key
 
 date_key
 
+## Source
+
+date_dimension
+
+## Business Owner
+
+Enterprise Analytics
+
 ## Important Fields
 
-| Column       | Business Meaning       |
-| ------------ | ---------------------- |
-| date_key     | Surrogate calendar key |
-| full_date    | Calendar date          |
-| year         | Reporting year         |
-| quarter      | Calendar quarter       |
-| month        | Calendar month         |
-| month_name   | Month description      |
-| week_of_year | ISO reporting week     |
+| Column | Business Meaning |
+|---------|------------------|
+| date_key | Calendar surrogate key |
+| full_date | Calendar date |
+| day | Day of month |
+| week | ISO week |
+| month | Calendar month |
+| month_name | Month description |
+| quarter | Calendar quarter |
+| year | Reporting year |
+| day_name | Weekday name |
+| is_weekend | Weekend indicator |
 
 ---
 
 # Fact Tables
+
+Fact tables capture measurable operational business events.
+
+Each fact table has a clearly defined grain and stores numerical measures used throughout the Gold business marts.
 
 ---
 
@@ -258,11 +428,15 @@ Captures every customer order placed on the marketplace.
 
 ## Grain
 
-One row per order.
+One row per customer order.
 
 ## Primary Key
 
 order_id
+
+## Source
+
+orders
 
 ## Measures
 
@@ -278,19 +452,19 @@ order_id
 
 ## Important Fields
 
-| Column          | Business Meaning             |
-| --------------- | ---------------------------- |
-| order_id        | Order identifier             |
-| customer_sk     | Customer surrogate key       |
-| customer_id     | Business customer identifier |
-| order_date      | Order creation date          |
-| order_status    | Current order status         |
-| payment_method  | Customer payment method      |
-| currency_code   | Transaction currency         |
-| order_amount    | Gross order value            |
-| shipping_fee    | Shipping charge              |
-| discount_amount | Promotional discount         |
-| net_amount      | Final amount paid            |
+| Column | Business Meaning |
+|---------|------------------|
+| order_id | Order identifier |
+| customer_sk | Customer surrogate key |
+| customer_id | Business customer identifier |
+| order_date | Order creation date |
+| order_status | Current order status |
+| payment_method | Payment method |
+| currency_code | Transaction currency |
+| order_amount | Gross order value |
+| shipping_fee | Shipping charge |
+| discount_amount | Promotional discount |
+| net_amount | Final amount paid |
 
 ---
 
@@ -298,7 +472,7 @@ order_id
 
 ## Business Purpose
 
-Captures each individual product purchased within an order.
+Captures every product purchased within an order.
 
 ## Grain
 
@@ -308,11 +482,16 @@ One row per purchased product.
 
 order_item_id
 
+## Source
+
+order_items
+
 ## Measures
 
 * Quantity
+* Unit Cost
 * Unit Price
-* Revenue
+* Line Revenue
 
 ## Dimensions
 
@@ -322,16 +501,16 @@ order_item_id
 
 ## Important Fields
 
-| Column        | Business Meaning      |
-| ------------- | --------------------- |
+| Column | Business Meaning |
+|---------|------------------|
 | order_item_id | Order line identifier |
-| order_id      | Parent order          |
-| seller_id     | Selling merchant      |
-| product_id    | Purchased product     |
-| quantity      | Units sold            |
-| unit_cost     | Procurement cost      |
-| unit_price    | Selling price         |
-| line_amount   | Revenue generated     |
+| order_id | Parent order |
+| seller_id | Selling merchant |
+| product_id | Purchased product |
+| quantity | Units sold |
+| unit_cost | Procurement cost |
+| unit_price | Selling price |
+| line_amount | Revenue generated |
 
 ---
 
@@ -339,7 +518,7 @@ order_item_id
 
 ## Business Purpose
 
-Captures the complete shipment lifecycle from dispatch through delivery.
+Captures the complete shipment lifecycle from warehouse dispatch to final customer delivery.
 
 ## Grain
 
@@ -349,39 +528,43 @@ One row per shipment.
 
 shipment_id
 
+## Source
+
+shipments
+
 ## Measures
 
 * Shipping Cost
 * Shipment Weight
-* Transit Days
+* Actual Transit Days
 * Delay Days
-* SLA Breach
+* SLA Breach Indicator
 
 ## Dimensions
 
 * Carrier
 * Warehouse
-* Customer Region
+* Region
 * Order
 
 ## Important Fields
 
-| Column                 | Business Meaning          |
-| ---------------------- | ------------------------- |
-| shipment_id            | Shipment identifier       |
-| order_id               | Parent order              |
-| warehouse_id           | Dispatch warehouse        |
-| carrier_id             | Logistics carrier         |
-| customer_region        | Delivery region           |
-| dispatch_date          | Shipment dispatch date    |
-| promised_delivery_date | SLA commitment date       |
-| actual_delivery_date   | Actual delivery date      |
-| shipment_status        | Shipment lifecycle status |
-| shipment_weight_kg     | Shipment weight           |
-| shipping_cost          | Shipment cost             |
-| actual_transit_days    | Actual transit duration   |
-| delay_days             | Delivery delay            |
-| is_sla_breached        | SLA breach indicator      |
+| Column | Business Meaning |
+|---------|------------------|
+| shipment_id | Shipment identifier |
+| order_id | Parent order |
+| warehouse_id | Dispatch warehouse |
+| carrier_id | Logistics carrier |
+| region_id | Delivery region |
+| dispatch_date | Dispatch date |
+| promised_delivery_date | SLA commitment |
+| actual_delivery_date | Delivery completion |
+| shipment_status | Shipment lifecycle status |
+| shipment_weight_kg | Shipment weight |
+| shipping_cost | Shipment cost |
+| actual_transit_days | Transit duration |
+| delay_days | Delivery delay |
+| is_sla_breached | SLA breach indicator |
 
 ---
 
@@ -389,70 +572,377 @@ shipment_id
 
 ## Business Purpose
 
-Stores operational shipment tracking events throughout the delivery lifecycle.
+Stores operational shipment tracking events recorded throughout the delivery lifecycle.
 
 ## Grain
 
-One row per shipment tracking event.
+One row per tracking event.
 
 ## Primary Key
 
 tracking_event_id
 
-## Business Event
+## Source
 
-Shipment status update.
+tracking_events
+
+## Measures
+
+This table contains operational events rather than additive business measures.
+
+It supports shipment traceability, exception monitoring, and operational analytics.
+
+## Dimensions
+
+* Shipment
+* Carrier
+* Date
 
 ## Important Fields
 
-| Column            | Business Meaning              |
-| ----------------- | ----------------------------- |
-| tracking_event_id | Tracking event identifier     |
-| shipment_id       | Shipment reference            |
-| order_id          | Related order                 |
-| carrier_id        | Logistics carrier             |
-| event_timestamp   | Event occurrence time         |
-| event_date        | Event calendar date           |
-| event_hour        | Event hour                    |
-| event_name        | Tracking event description    |
-| event_status      | Event execution status        |
-| event_location    | Tracking location             |
-| is_exception      | Exception indicator           |
+| Column | Business Meaning |
+|---------|------------------|
+| tracking_event_id | Tracking event identifier |
+| shipment_id | Shipment reference |
+| order_id | Related order |
+| carrier_id | Logistics carrier |
+| event_timestamp | Event timestamp |
+| event_date | Event date |
+| event_hour | Event hour |
+| event_name | Tracking event |
+| event_status | Event status |
+| event_location | Event location |
+| is_exception | Operational exception indicator |
 | is_delivery_event | Delivery completion indicator |
 
 ---
+# Gold Business Marts
 
-# Gold Layer
+The Gold layer contains business ready analytical datasets designed for executive reporting, operational monitoring, and dashboard visualization.
 
-The Gold layer contains curated business marts designed for reporting and executive dashboards.
-
-| Mart                       | Business Purpose                   |
-| -------------------------- | ---------------------------------- |
-| mart_logistics_overview    | Enterprise logistics KPI reporting |
-| mart_carrier_performance   | Carrier performance benchmarking   |
-| mart_warehouse_performance | Warehouse operational analysis     |
-| mart_region_performance    | Regional delivery analysis         |
-| mart_seller_performance    | Seller logistics performance       |
-| mart_financial_impact      | Executive logistics cost analysis  |
+Each mart answers a specific business problem while exposing governed KPIs built from the Silver warehouse.
 
 ---
 
-# Data Governance
+# mart_logistics_overview
 
-The data dictionary supports consistent business definitions across the warehouse.
+## Business Purpose
 
-Key governance principles include:
+Provides enterprise level logistics KPIs across the complete marketplace.
 
-* Single source of truth for business entities
-* Historical accuracy through Slowly Changing Dimensions
-* Consistent KPI definitions
-* Business friendly naming conventions
-* Traceability from Gold marts back to operational events
+## Grain
+
+One row per reporting date.
+
+## Primary Business Users
+
+* Executive Leadership
+* Operations Managers
+* Business Analysts
+
+## Example KPIs
+
+* Total Orders
+* Total Revenue
+* Average Order Value
+* Average Delivery Time
+* SLA Compliance
+* On Time Delivery Rate
+* Late Deliveries
+* Total Shipping Cost
+
+---
+
+# mart_carrier_performance
+
+## Business Purpose
+
+Measures logistics carrier performance and SLA compliance.
+
+## Grain
+
+One row per carrier.
+
+## Primary Business Users
+
+* Logistics Managers
+* Carrier Operations
+
+## Example KPIs
+
+* Shipments Delivered
+* Average Transit Time
+* Delay Days
+* SLA Achievement %
+* Average Shipping Cost
+* Late Shipment Rate
+
+---
+
+# mart_warehouse_performance
+
+## Business Purpose
+
+Evaluates warehouse operational efficiency.
+
+## Grain
+
+One row per warehouse.
+
+## Primary Business Users
+
+* Warehouse Managers
+* Supply Chain Operations
+
+## Example KPIs
+
+* Orders Processed
+* Shipments Dispatched
+* Average Dispatch Time
+* Warehouse Utilization
+* Delivery Performance
+
+---
+
+# mart_region_performance
+
+## Business Purpose
+
+Measures logistics performance across geographic regions.
+
+## Grain
+
+One row per region.
+
+## Primary Business Users
+
+* Regional Operations
+* Business Strategy
+
+## Example KPIs
+
+* Orders
+* Revenue
+* Delivery Time
+* Shipping Cost
+* SLA Compliance
+* Customer Distribution
+
+---
+
+# mart_seller_performance
+
+## Business Purpose
+
+Measures seller fulfillment efficiency and logistics contribution.
+
+## Grain
+
+One row per seller.
+
+## Primary Business Users
+
+* Marketplace Operations
+* Seller Success Team
+
+## Example KPIs
+
+* Orders Fulfilled
+* Revenue
+* Average Delivery Time
+* Shipping Cost
+* Customer Rating
+
+---
+
+# mart_financial_impact
+
+## Business Purpose
+
+Summarizes logistics related financial performance.
+
+## Grain
+
+Executive summary.
+
+## Primary Business Users
+
+* Finance
+* Executive Leadership
+
+## Example KPIs
+
+* Total Revenue
+* Total Shipping Cost
+* Average Shipping Cost
+* Logistics Cost %
+* Delayed Shipment Cost
+* On Time Shipment Cost
+
+---
+
+# Warehouse Platform
+
+The Marketplace Logistics Intelligence Platform combines multiple modern analytics technologies.
+
+| Component | Technology |
+|------------|------------|
+| Storage | Parquet |
+| Warehouse | DuckDB |
+| Transformation | dbt Core |
+| Orchestration | Apache Airflow |
+| Containerization | Docker Compose |
+| Business Output | Gold Business Marts |
+| Dashboard Layer | Dashboard Visualization (Power BI, Streamlit, HTML, etc.) |
+
+---
+
+# Data Lineage
+
+The complete data lineage follows the ELT workflow below.
+
+```text
+Synthetic Dataset Generation
+
+        │
+
+        ▼
+
+Bronze Parquet Files
+
+        │
+
+        ▼
+
+load_bronze.py
+
+        │
+
+        ▼
+
+DuckDB Bronze Tables
+
+        │
+
+        ▼
+
+dbt debug
+
+        │
+
+        ▼
+
+dbt build
+
+        │
+
+        ▼
+
+Silver Layer
+
+        │
+
+        ▼
+
+Gold Business Marts
+
+        │
+
+        ▼
+
+export_gold_marts.py
+
+        │
+
+        ▼
+
+CSV Business Marts
+
+        │
+
+        ▼
+
+Dashboard Visualization
+```
+
+---
+
+# Data Ownership
+
+| Dataset | Business Owner |
+|----------|----------------|
+| Customers | Customer Operations |
+| Sellers | Marketplace Operations |
+| Products | Product Management |
+| Warehouses | Warehouse Operations |
+| Carriers | Logistics Operations |
+| Orders | Sales Operations |
+| Shipments | Logistics Operations |
+| Tracking Events | Delivery Operations |
+| Gold Business Marts | Enterprise Analytics |
+
+---
+
+# Business Rules
+
+The warehouse follows governed business definitions to ensure consistent reporting.
+
+## Customer History
+
+Historical customer attributes are preserved using Slowly Changing Dimension Type 2.
+
+---
+
+## Carrier History
+
+Historical carrier SLA configurations are preserved using Slowly Changing Dimension Type 2.
+
+---
+
+## Shipment KPIs
+
+Delivery performance metrics are calculated only for completed shipments.
+
+---
+
+## Financial Metrics
+
+Revenue and logistics costs are calculated from governed Gold marts rather than raw operational tables.
+
+---
+
+## Dashboard Consumption
+
+Business users consume only Gold Business Marts.
+
+Operational investigations and root cause analysis are performed using Silver dimensions and facts.
+
+---
+
+# Naming Conventions
+
+| Prefix | Meaning |
+|---------|----------|
+| stg_ | Staging Model |
+| dim_ | Dimension Table |
+| fct_ | Fact Table |
+| mart_ | Gold Business Mart |
 
 ---
 
 # Summary
 
-The Marketplace Logistics Intelligence Platform organizes operational logistics data into well defined business entities and measurable events.
+The Marketplace Logistics Intelligence Platform implements a production style Analytics Engineering architecture built on DuckDB, dbt Core, Apache Airflow, and Docker Compose.
 
-This data dictionary provides a shared business vocabulary that ensures analysts, engineers, and business stakeholders interpret the warehouse consistently while supporting reliable reporting and decision making.
+The warehouse contains:
+
+* **11 Bronze operational datasets**
+* **7 reusable dimension tables**
+* **4 transactional fact tables**
+* **6 governed Gold business marts**
+
+Data flows through an automated ELT pipeline orchestrated by Apache Airflow:
+
+**load_bronze.py → dbt debug → dbt build → export_gold_marts.py**
+
+The resulting Gold Business Marts provide trusted datasets for dashboard visualization, executive reporting, KPI monitoring, and business decision making while maintaining complete traceability back to the original operational data.

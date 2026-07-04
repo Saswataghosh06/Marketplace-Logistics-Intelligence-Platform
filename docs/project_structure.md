@@ -30,9 +30,8 @@ marketplace-logistics-intelligence-platform/
 
 │
 ├── data/
-│   ├── raw/
-│   ├── bronze/
-│   └── generated/
+│   ├── bronze/(python generated raw synthetic parquet datasets) 
+│   └── gold/(exported CSV files)
 │
 ├── notebooks/
 │
@@ -52,9 +51,6 @@ marketplace-logistics-intelligence-platform/
 ├── dashboards/
 │
 ├── images/
-│
-├── tests/
-│
 ├── README.md
 └── requirements.txt
 ```

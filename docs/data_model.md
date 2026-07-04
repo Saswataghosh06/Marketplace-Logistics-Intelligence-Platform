@@ -8,249 +8,163 @@
 
 # Purpose
 
-This document describes the logical and physical data model used in the Marketplace Logistics Intelligence Platform.
+This document describes the logical and physical dimensional data model used in the Marketplace Logistics Intelligence Platform.
 
-The warehouse follows a Star Schema designed using modern dimensional modeling principles. The model organizes operational logistics data into reusable dimensions and business event driven fact tables that support analytical workloads, KPI reporting, and executive dashboards.
+The platform follows a modern Medallion Architecture combined with a Star Schema dimensional warehouse.
 
-The design prioritizes:
+The pipeline transforms raw marketplace logistics data through Bronze, Silver, and Gold layers before producing business ready datasets for dashboard visualization.
 
-* Query performance
-* Simplicity
-* Reusability
-* Business readability
-* Historical accuracy
-* Scalable analytics engineering
+---
+
+# Data Warehouse Architecture
+
+```text
+                Bronze Layer
+        (11 Raw Parquet Datasets)
+
+                    │
+
+                    ▼
+
+               Silver Layer
+
+      Staging → Dimensions → Facts
+
+                    │
+
+                    ▼
+
+              Gold Business Marts
+
+                    │
+
+                    ▼
+
+        Dashboard Visualization
+```
+
+---
+
+# Technology Stack
+
+| Layer | Technology |
+|---------|------------|
+| Bronze | Python + Parquet |
+| Warehouse | DuckDB |
+| Transformations | dbt Core |
+| Orchestration | Apache Airflow |
+| Deployment | Docker |
+| Reporting | Dashboard Visualization |
 
 ---
 
 # Modeling Approach
 
-The warehouse follows a dimensional modeling approach consisting of:
+The warehouse follows a Star Schema consisting of reusable dimensions and transactional fact tables.
 
-* Dimension tables describing business entities
-* Fact tables capturing measurable business events
-* Gold marts aggregating business KPIs
-
-```
-                    Dimension Tables
+```text
+                Dimension Tables
 
 Customers
 Products
 Sellers
 Carriers
 Warehouses
+Regions
 Date
 
-          │
+            │
 
-          ▼
+            ▼
 
-        Fact Tables
+           Fact Tables
 
 Orders
 Order Items
 Shipments
 Tracking Events
 
-          │
+            │
 
-          ▼
+            ▼
 
-     Gold Business Marts
+          Gold Marts
+
+Executive Overview
 
 Carrier Performance
 
 Warehouse Performance
 
-Seller Performance
-
 Region Performance
 
+Seller Performance
+
 Financial Impact
-
-Executive Overview
 ```
 
 ---
 
-# Why Star Schema?
+# Bronze Layer
 
-A Star Schema was selected because it provides:
+The Bronze layer contains immutable raw operational datasets stored as Parquet files.
 
-* Fast analytical queries
-* Simplified joins
-* Consistent business metrics
-* Easy dashboard development
-* Reusable dimensions
-* Excellent compatibility with Power BI
+Current datasets
 
-Unlike normalized transactional databases, the Star Schema is optimized for reporting and business intelligence.
+* Customers
+* Products
+* Sellers
+* Orders
+* Order Items
+* Shipments
+* Tracking Events
+* Warehouses
+* Regions
+* Carriers
+* Date
 
----
+Total Bronze datasets
 
-# Warehouse Layers
-
-```
-Python Generator
-
-        │
-
-        ▼
-
-Bronze
-
-Raw Operational Data
-
-        │
-
-        ▼
-
-Silver
-
-Dimensions
-
-Facts
-
-        │
-
-        ▼
-
-Gold
-
-Business Marts
-```
+**11**
 
 ---
 
-# Silver Layer Data Model
+# Silver Layer
 
-The Silver layer represents the enterprise analytical warehouse.
+The Silver layer represents the enterprise dimensional warehouse.
 
-It contains reusable dimensions and fact tables that become the foundation for all downstream reporting.
+It contains reusable staging models, dimensions, and fact tables.
+
+---
+
+# Staging Models
+
+Responsibilities
+
+* Standardize column names
+* Data type conversion
+* Basic cleaning
+* Prepare reusable datasets
 
 ---
 
 # Dimension Tables
 
-Dimension tables describe business entities and provide descriptive attributes for analytical filtering and grouping.
+Dimension tables describe business entities.
 
-## dim_customers
+| Dimension | Grain |
+|------------|--------|
+| dim_customers | One row per customer |
+| dim_products | One row per product |
+| dim_sellers | One row per seller |
+| dim_carriers | One row per carrier |
+| dim_warehouses | One row per warehouse |
+| dim_regions | One row per region |
+| dim_date | One row per calendar date |
 
-### Grain
+Total Dimensions
 
-One row per customer version.
-
-### Key
-
-customer_sk
-
-### Business Purpose
-
-Stores customer master data while preserving historical changes using Slowly Changing Dimension Type 2.
-
-### Used By
-
-* fct_orders
-
----
-
-## dim_carriers
-
-### Grain
-
-One row per carrier version.
-
-### Key
-
-carrier_sk
-
-### Business Purpose
-
-Stores carrier attributes and historical SLA configurations.
-
-### Used By
-
-* fct_shipments
-
----
-
-## dim_products
-
-### Grain
-
-One row per product.
-
-### Key
-
-product_id
-
-### Business Purpose
-
-Provides product attributes for revenue and seller analysis.
-
-### Used By
-
-* fct_order_items
-
----
-
-## dim_sellers
-
-### Grain
-
-One row per seller.
-
-### Key
-
-seller_id
-
-### Business Purpose
-
-Stores seller profile information used for operational and revenue reporting.
-
-### Used By
-
-* fct_order_items
-
----
-
-## dim_warehouses
-
-### Grain
-
-One row per warehouse.
-
-### Key
-
-warehouse_id
-
-### Business Purpose
-
-Provides warehouse descriptive information for logistics reporting.
-
-### Used By
-
-* fct_shipments
-
----
-
-## dim_date
-
-### Grain
-
-One row per calendar date.
-
-### Key
-
-date_key
-
-### Business Purpose
-
-Supports time based reporting across all business processes.
-
-### Used By
-
-* mart_logistics_overview
+**7**
 
 ---
 
@@ -262,22 +176,18 @@ Fact tables capture measurable business events.
 
 ## fct_orders
 
-### Grain
+Grain
 
-One row per customer order.
+One row per order
 
-### Business Event
-
-Customer places an order.
-
-### Measures
+Measures
 
 * Order Amount
 * Shipping Fee
 * Discount
 * Net Amount
 
-### Dimensions
+Dimensions
 
 * Customer
 * Date
@@ -286,21 +196,17 @@ Customer places an order.
 
 ## fct_order_items
 
-### Grain
+Grain
 
-One row per product purchased within an order.
+One row per product purchased
 
-### Business Event
-
-Customer purchases an individual product.
-
-### Measures
+Measures
 
 * Quantity
-* Unit Price
 * Revenue
+* Unit Price
 
-### Dimensions
+Dimensions
 
 * Product
 * Seller
@@ -310,15 +216,11 @@ Customer purchases an individual product.
 
 ## fct_shipments
 
-### Grain
+Grain
 
-One row per shipment.
+One row per shipment
 
-### Business Event
-
-Shipment moves through the logistics network.
-
-### Measures
+Measures
 
 * Shipping Cost
 * Transit Days
@@ -326,74 +228,58 @@ Shipment moves through the logistics network.
 * Shipment Weight
 * SLA Breach
 
-### Dimensions
+Dimensions
 
 * Carrier
 * Warehouse
-* Customer Region
+* Region
 * Order
 
 ---
 
 ## fct_tracking_events
 
-### Grain
+Grain
 
-One row per shipment tracking event.
+One row per shipment event
 
-### Business Event
+Measures
 
-Operational shipment status update.
+* Operational Events
 
-### Measures
+Dimensions
 
-No additive business measures.
+* Shipment
+* Carrier
+* Date
 
-This table captures operational events used for shipment traceability and future event level analytics.
+Total Fact Tables
+
+**4**
 
 ---
 
-# Entity Relationships
+# Entity Relationship
 
-```
+```text
 dim_customers
-
         │
-
         ▼
-
 fct_orders
-
         │
-
         ▼
-
 fct_order_items
-
+      ┌─┴─────────────┐
+      ▼               ▼
+dim_products     dim_sellers
         │
-
- ┌──────┴─────────┐
-
- ▼                ▼
-
-dim_products   dim_sellers
-
-        │
-
         ▼
-
 fct_shipments
-
- ┌──────┬─────────┐
-
- ▼      ▼         ▼
-
-Carriers Warehouses Regions
-
+ ┌─────┼──────────┬─────────┐
+ ▼     ▼          ▼         ▼
+Carrier Warehouse Region Order
         │
-
         ▼
-
 fct_tracking_events
 ```
 
@@ -401,22 +287,37 @@ fct_tracking_events
 
 # Slowly Changing Dimensions
 
-Historical tracking is implemented where business attributes change over time.
+Historical tracking is implemented using SCD Type 2 where appropriate.
 
-| Dimension | Type       |
-| --------- | ---------- |
+| Dimension | Type |
+|------------|------|
 | Customers | SCD Type 2 |
-| Carriers  | SCD Type 2 |
+| Carriers | SCD Type 2 |
 
-This ensures historical reports remain accurate even after customer or carrier attributes change.
+---
+
+# Gold Layer
+
+Gold marts aggregate Silver facts into business ready analytical datasets.
+
+| Gold Mart | Grain |
+|------------|--------|
+| mart_logistics_overview | One row per calendar date |
+| mart_carrier_performance | One row per carrier |
+| mart_warehouse_performance | One row per warehouse |
+| mart_region_performance | One row per region |
+| mart_seller_performance | One row per seller |
+| mart_financial_impact | Executive KPI summary |
+
+Total Gold Marts
+
+**6**
 
 ---
 
 # Business Event Flow
 
-The warehouse models the complete logistics lifecycle.
-
-```
+```text
 Customer
 
       │
@@ -429,13 +330,13 @@ Order Created
 
       ▼
 
-Order Items Generated
+Order Items Created
 
       │
 
       ▼
 
-Shipment Created
+Shipment Generated
 
       │
 
@@ -453,68 +354,85 @@ Shipment Delivered
 
       ▼
 
-Business KPIs Calculated
+Business Marts Generated
+
+      │
+
+      ▼
+
+Dashboard Visualization
 ```
 
 ---
 
-# Gold Layer Data Model
+# Pipeline Integration
 
-Gold marts aggregate Silver facts into business ready datasets.
+The warehouse is refreshed through Apache Airflow.
 
-| Gold Mart                  | Grain                        |
-| -------------------------- | ---------------------------- |
-| mart_logistics_overview    | One row per calendar date    |
-| mart_carrier_performance   | One row per carrier          |
-| mart_warehouse_performance | One row per warehouse        |
-| mart_region_performance    | One row per customer region  |
-| mart_seller_performance    | One row per seller           |
-| mart_financial_impact      | Single executive summary row |
+```text
+load_bronze.py
 
-Each mart is designed around a single business problem and contains governed KPI definitions.
+        │
+
+        ▼
+
+dbt debug
+
+        │
+
+        ▼
+
+dbt build
+
+        │
+
+        ▼
+
+export_gold_marts.py
+
+        │
+
+        ▼
+
+Dashboard Visualization
+```
 
 ---
 
 # Design Decisions
 
-Several design decisions were made to improve analytical usability.
+## Star Schema
 
-## Surrogate Keys
+Chosen for
 
-Customer and carrier dimensions use surrogate keys to support SCD Type 2 history.
-
-## Natural Keys
-
-Products, sellers, and warehouses retain stable business identifiers.
-
-## Fact Separation
-
-Orders, shipments, and tracking events are stored independently because they represent different business processes.
-
-## Business Marts
-
-Gold marts aggregate data by business subject rather than exposing transactional detail.
+* Fast analytical queries
+* Simple joins
+* Business friendly reporting
 
 ---
 
-# Benefits
+## Surrogate Keys
 
-The final data model provides:
+Used where historical tracking is required.
 
-* Clear separation between descriptive data and measurable events
-* High performance analytical queries
-* Reusable dimensions
-* Historical reporting accuracy
-* Simplified Power BI modeling
-* Consistent KPI calculations
-* Enterprise style dimensional warehouse design
+---
+
+## Fact Separation
+
+Orders, shipments, order items, and tracking events represent independent business processes.
+
+---
+
+## Gold Marts
+
+Designed around business domains rather than transactional detail.
 
 ---
 
 # Summary
 
-The Marketplace Logistics Intelligence Platform uses a Star Schema to transform raw logistics operations into a scalable analytical warehouse.
+The Marketplace Logistics Intelligence Platform implements a modern dimensional warehouse using DuckDB and dbt.
 
-Dimension tables describe business entities, fact tables capture operational events, and Gold marts deliver trusted KPIs for executive reporting and operational decision making.
+The solution transforms 11 raw Bronze datasets into 7 reusable dimensions, 4 transactional fact tables, and 6 business ready Gold marts.
 
-The model balances analytical performance, historical accuracy, and business usability while following modern Analytics Engineering best practices.
+Apache Airflow orchestrates the complete ELT pipeline while Docker provides reproducible deployment. The resulting datasets support dashboard visualization and executive analytics through a scalable Analytics Engineering architecture.
