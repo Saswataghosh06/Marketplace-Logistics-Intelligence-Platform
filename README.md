@@ -92,8 +92,8 @@ Dashboard (HTML, in progress)
 
 The whole thing runs as one Airflow DAG (`logistics_pipeline`), four tasks in sequence: `load_bronze → dbt_debug → dbt_build → export_gold`, each gated on the last one succeeding. It's containerized with Docker so dev and "production" don't silently disagree with each other — mostly.
 
-> 📸 `images/airflow_dag_success.png` — placeholder, DAG graph view, all four tasks green
-> 📸 `images/dbt_lineage_graph.png` — placeholder, full dbt lineage from source to marts
+> <img width="858" height="606" alt="Image" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" />
+> <img width="1280" height="720" alt="Image" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" />
 
 ### Stack, and why each piece
 
