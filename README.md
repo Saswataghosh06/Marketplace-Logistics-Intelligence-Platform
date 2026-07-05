@@ -1,332 +1,315 @@
-# Marketplace Logistics Intelligence Platform
+<div align="center">
+  <img width="140px" src="images/logo.png" alt="Logistics Group logo — placeholder, swap for your real logo file" />
+</div>
 
-**A simulated logistics network, analyzed like a real consulting engagement.**
+<h1 align="center">Marketplace Logistics Intelligence Platform</h1>
+<h3 align="center">Executive Diagnostic Report — Simulated National Logistics Network</h3>
 
-I generated a synthetic dataset for a national e-commerce logistics operation (~500K shipments, 25 carriers, 120 warehouses, 2,000 sellers), built a governed dbt/DuckDB warehouse on top of it, orchestrated the pipeline with Airflow in Docker, and then ran the kind of diagnostic a logistics ops consultant would run: not "here's a dashboard," but "here's why the numbers look the way they do, and here's what I'd fix first." Headline finding: premium carriers cost 5.8x more per kg than economy carriers in this dataset, for statistically identical SLA performance. Setup and reproduction steps live in [`SETUP.md`](./SETUP.md).
-
-<p>
-  <img alt="status" src="https://img.shields.io/badge/status-portfolio_case_study-blue">
-  <img alt="data" src="https://img.shields.io/badge/data-synthetic_%2F_self_generated-lightgrey">
-  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_Airflow_%7C_Docker-orange">
-  <img alt="quality" src="https://img.shields.io/badge/data_quality-0_nulls_%7C_0_duplicates-brightgreen">
+<p align="center">
+  <img alt="status" src="https://img.shields.io/badge/status-portfolio_case_study-1E56C7">
+  <img alt="data" src="https://img.shields.io/badge/data-synthetic_%2F_self_generated-8B98AE">
+  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_Airflow_%7C_Docker-1E56C7">
+  <img alt="quality" src="https://img.shields.io/badge/data_quality-0_nulls_%7C_0_duplicates-12A879">
 </p>
 
-**Author:** Saswata Ghosh · [GitHub](https://github.com/Saswataghosh06/Marketplace-Logistics-Intelligence-Platform) · [LinkedIn](#) · [Email](#)
+<p align="center"><b>Saswata Ghosh</b> · Analytics Engineer / Data Analyst<br>
+<a href="https://github.com/Saswataghosh06/Marketplace-Logistics-Intelligence-Platform">GitHub Repo</a> · <a href="#">LinkedIn</a> · <a href="#">Email</a> · <a href="./SETUP.md">Reproduce This Project →</a></p>
 
 ---
 
-## A note on the data, up front
+### Read This in 60 Seconds
 
-Every number below — the ₹98.57M in logistics spend, the 6.97% SLA breach rate, the seller with a 22.99% failure rate — comes from a dataset I designed and generated myself in Python. It's not a real company's financials. I'm stating this here instead of burying it in a caveats section at the bottom, because pretending otherwise would be the fastest way to lose credibility with anyone who asks a follow-up question.
-
-What *is* real: the architecture decisions, the data quality problems I deliberately built in (and how I chose to handle them), the pipeline bug I actually hit and fixed, and the analytical method — reading six business-domain marts together to find a story none of them tell alone. That's the part meant to transfer to an actual job.
-
-Read the findings below as "what this simulated network shows," not "market research." I've tried to write it that way consistently rather than just saying it once and forgetting.
+> **What this is:** a self-generated ~500K-shipment logistics dataset, built into a governed dbt/DuckDB warehouse, analyzed the way an operations consultant would — not "here's a dashboard" but "here's why the numbers look this way, and what I'd fix first."
+>
+> **What to do with this page:** skim the Executive Summary for the headline finding and the money number. If that lands, read the Insights section for the evidence. If you're evaluating engineering depth, jump to [Tech Stack, Architecture & Code](#tech-stack-architecture--code) — full technical documentation lives in `/docs`, linked at the bottom.
+>
+> **The one thing worth remembering:** premium carriers in this dataset cost **5.8× more per kg** than economy carriers for **statistically identical** on-time performance. That single number is the throughline for most of the recommendations below.
 
 ---
 
 ## Table of Contents
-
-1. [Why I Built This](#why-i-built-this)
-2. [Architecture](#architecture)
-3. [Data Model](#data-model)
-4. [Data Quality & Governance](#data-quality--governance)
-5. [Findings, Mart by Mart](#findings-mart-by-mart)
-6. [Cross-Mart Synthesis](#cross-mart-synthesis)
-7. [Recommendations, If This Were Real](#recommendations-if-this-were-real)
-8. [A Real Bug I Hit](#a-real-bug-i-hit)
-9. [Limitations](#limitations)
-10. [Repository Structure](#repository-structure)
-11. [What's Next](#whats-next)
+1. [Background & Overview](#1-background--overview)
+2. [Objective](#2-objective)
+3. [Data Structure & Initial Checks](#3-data-structure--initial-checks)
+4. [Executive Summary](#4-executive-summary)
+5. [Insights Deep Dive](#5-insights-deep-dive)
+6. [Recommendations](#6-recommendations)
+7. [Tech Stack, Architecture & Code](#7-tech-stack-architecture--code)
+8. [Caveats & Assumptions](#8-caveats--assumptions)
 
 ---
 
-## Why I Built This
+## 1. Background & Overview
 
-Most portfolio data projects grab a clean Kaggle CSV and make a chart. I wanted to practice the harder and more realistic version of the job: design a business scenario, generate data messy enough to be believable, build the pipeline that turns that mess into something trustworthy, and then actually reason about what the numbers mean for a business.
+I'm approaching this project the way an analytics engineer would approach a first-week engagement with a new logistics client: don't trust the dashboards that already exist, rebuild the data model from the ground up, validate it, and only then start forming opinions about what's actually happening operationally.
 
-The scenario I picked: a logistics network that looks fine on paper — decent infrastructure, stable carriers, steady demand — but keeps missing delivery promises. The question I set out to answer:
+The "client" here is a simulated national e-commerce logistics network — 25 carriers, 120 warehouses, 5 regions, 2,000 marketplace sellers, ~500K shipments across four years (2022–2025). I designed and generated this dataset myself in Python specifically so it would behave like a real operational system: messy in the ways real systems are messy (missing references, late-arriving records, duplicate events), not the clean, pre-solved version you get from a Kaggle download.
 
-> "If the infrastructure looks adequate, why isn't performance matching it, and what would I fix first with a limited budget?"
+On top of that data, I built a governed dimensional warehouse (Bronze → Silver → Gold), orchestrated it with Apache Airflow in Docker, and ran a cross-functional diagnostic across six business-domain marts — Overview, Carrier, Warehouse, Region, Seller, and Financial — to answer the kind of question a COO actually asks, not the kind a tutorial asks.
 
-That's a question five different roles get asked in real life: a data engineer building the pipeline that surfaces it, a BI analyst building the dashboard, a business analyst writing the memo, or a consultant standing in front of the exec team. I wanted this repo to hold up under any of those lenses.
+---
 
-### Business questions the marts were built to answer
+## 2. Objective
 
+The logistics network in this dataset looks adequate on paper: reasonable infrastructure, stable carrier partners, predictable demand. It still misses roughly **7% of delivery commitments**, and no single team's dashboard explains why.
+
+**The objective of this project is to answer one question with evidence, not assumption:**
+
+> *If the infrastructure looks fine, why isn't performance matching it — and with a limited budget, what gets fixed first?*
+
+That question sits at the intersection of five roles — data engineer, BI analyst, business analyst, operations consultant, and finance — so the project was built to hold up under any of those lenses, not just one.
+
+**Business questions this project answers:**
 - Which carriers are worth the money, and which aren't?
-- Are warehouses actually the bottleneck, or is it something upstream?
-- Does demand match where the infrastructure is?
-- Which sellers create risk that a dashboard by carrier or warehouse alone would never surface?
-- What does a missed SLA actually cost, in currency, not just a percentage?
+- Are warehouses actually the bottleneck — or is the constraint somewhere upstream?
+- Does inventory sit where customer demand actually is?
+- Which sellers create delivery risk that a carrier or warehouse report alone would never surface?
+- What does a missed SLA cost in currency, not just in percentage points?
 
 ---
 
-## Architecture
+## 3. Data Structure & Initial Checks
 
-Medallion architecture (Bronze → Silver → Gold), star schema warehouse, orchestrated locally with Apache Airflow running in Docker — not a cloud-scale deployment, just a correctly-structured one.
+The warehouse follows a **Medallion Architecture** (Bronze → Silver → Gold) with a **Star Schema** dimensional model: 7 conformed dimensions, 4 fact tables, 6 Gold marts.
 
-```
-Python data generator (11 entities)
-        │
-        ▼
-Bronze — raw Parquet, immutable, untouched
-        │
-        ▼
-load_bronze.py  →  DuckDB
-        │
-        ▼
-dbt debug  →  dbt build
-        │
-        ▼
-Silver — staging → dimensions → facts (DuckDB + dbt)
-        │
-        ▼
-Gold — 6 business marts, dbt schema tests
-        │
-        ▼
-export_gold_marts.py  →  CSV
-        │
-        ▼
-Dashboard (HTML, in progress)
-```
+<div align="center">
+<table>
+<tr>
+<td width="50%" align="center"><b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
+<img width="420" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
+</td>
+<td width="50%" align="center"><b>Airflow Orchestration DAG</b><br><sub>4-task pipeline, all green</sub><br><br>
+<img width="420" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" alt="Airflow DAG success run" />
+</td>
+</tr>
+</table>
+</div>
 
-The whole thing runs as one Airflow DAG (`logistics_pipeline`), four tasks in sequence: `load_bronze → dbt_debug → dbt_build → export_gold`, each gated on the last one succeeding. It's containerized with Docker so dev and "production" don't silently disagree with each other — mostly.
+**Initial checks performed before any analysis began** (full methodology in `docs/data_quality_audit.md`):
 
-> <img width="858" height="606" alt="Image" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" />
-> <img width="1280" height="720" alt="Image" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" />
+| Check | Result |
+|---|---|
+| Missing values across all 6 Gold marts | **0** |
+| Duplicate records across all 6 Gold marts | **0** |
+| Grain validated per mart (1 row per entity) | **Confirmed** — daily, carrier, warehouse, region, seller, enterprise |
+| Referential integrity (Orders↔Customers, Shipments↔Carriers/Warehouses, etc.) | **Passed** via dbt tests |
+| Business-rule bounds (utilization 0–100%, ratings 1–5, costs ≥ 0, etc.) | **Passed** via dbt tests |
 
-### Stack, and why each piece
+I re-ran the null, duplicate, and grain checks myself directly against the exported CSVs before writing a single insight below — see [Section 8](#8-caveats--assumptions) for the one discrepancy I found and chose to disclose rather than quietly fix.
+
+Full ERD, table-level grain, and SCD2 design notes: **`docs/data_model.md`**
+
+---
+
+## 4. Executive Summary
+
+<div align="center">
+<img width="900" src="images/dashboard-overview.png" alt="Overview dashboard screenshot — placeholder" />
+<br><sub><i>Overview dashboard — placeholder, screenshot pending</i></sub>
+</div>
+
+<br>
+
+<table align="center">
+<tr>
+<td align="center" width="20%"><h2>1.87%</h2><sub>Avg. warehouse utilization<br>across 120 facilities</sub></td>
+<td align="center" width="20%"><h2>6.97%</h2><sub>Network-wide SLA<br>breach rate</sub></td>
+<td align="center" width="20%"><h2>5.8×</h2><sub>Premium vs. Economy<br>carrier cost per kg</sub></td>
+<td align="center" width="20%"><h2>₹6.88M</h2><sub>Cost of SLA-breached<br>shipments (of ₹98.6M spend)</sub></td>
+<td align="center" width="20%"><h2>0–23%</h2><sub>Seller SLA breach<br>spread (2,000 sellers)</sub></td>
+</tr>
+</table>
+
+**Headline finding:** the network is not capacity-constrained. It's allocation-constrained. Warehouses run at under 2% of built capacity while SLA breaches still spike to 13% on peak days; premium carriers cost 5.8× more without delivering measurably better reliability; and a 23-point SLA spread across sellers is invisible to anyone only looking at carrier or warehouse reports.
+
+**Bottom line:** almost every recommendation in this report is an allocation and accountability fix, not a capital request — which is usually the recommendation that gets funded fastest.
+
+Full findings, by mart, with the evidence behind each number, are in Section 5.
+
+---
+
+## 5. Insights Deep Dive
+
+*(Every number below is a pattern in the simulated dataset, stated the way I'd state a real one — see [Caveats](#8-caveats--assumptions).)*
+
+### 5.1 Carrier Performance
+
+<div align="center">
+<img width="440" src="images/dashboard-carrier-cost.png" alt="Carrier cost per tier chart — placeholder" />
+<img width="440" src="images/dashboard-carrier-sla.png" alt="Carrier SLA breach per tier chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Avg. cost per kg — Premium tier | **₹41.00** | 5.8× Economy tier (₹7.12) |
+| Avg. SLA breach — Premium tier | **7.22%** | Not meaningfully better than Economy (6.99%) or Express (6.91%) |
+| Best / worst carrier by SLA | Borzo 6.55% / Aramex 7.73% | Range across all 25 carriers is under 1.2 points — tight and systemic |
+| Transit time by tier | 1.6 days (Premium) → 8.5 days (Economy) | Scales exactly as designed — carriers execute on speed reliably |
+
+**So what:** carriers differentiate cleanly on speed and not at all on reliability. Paying for Premium buys a faster average, not a safer one.
+
+---
+
+### 5.2 Warehouse Performance
+
+<div align="center">
+<img width="440" src="images/dashboard-warehouse-utilization.png" alt="Warehouse utilization by region chart — placeholder" />
+<img width="440" src="images/dashboard-warehouse-sla.png" alt="Warehouse SLA vs utilization chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Network-wide avg. utilization | **1.87%** | Peak facility utilization is only 5.53% — no facility is close to saturated |
+| Utilization by region | East 4.18% (highest) / West 0.90% (lowest) | 4.6× spread between busiest and quietest region |
+| Correlation: warehouse rating ↔ SLA breach | **-0.002** | Effectively zero — top-rated Tier 1 facilities (Delhi, Chennai, Mumbai) post some of the worst SLA numbers |
+| Correlation: utilization ↔ SLA breach | **0.017** | Also effectively zero — busier facilities aren't the ones failing |
+
+**So what:** this rules out the two easiest explanations (facility quality, facility busyness). Whatever's driving delivery failures is happening upstream of the warehouse floor.
+
+---
+
+### 5.3 Region Performance
+
+<div align="center">
+<img width="440" src="images/dashboard-region-volume.png" alt="Region shipment volume chart — placeholder" />
+<img width="440" src="images/dashboard-region-sla.png" alt="Region SLA breach chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| South + North share of national volume | **53%** (130,844 + 130,092 shipments) | Central is the smallest market at 50,174 |
+| Cost per kg, transit time, avg. cost | Nearly flat nationwide (~₹9.72/kg, ~4.92 days, ~₹197) | Same operating model regardless of local demand density |
+| SLA breach range | 6.80% (Central, best) → 7.07% (East, worst) | Modest spread, but meaningful at this shipment volume |
+
+**So what:** one national playbook is being run everywhere, whether or not the local market looks the same — which forfeits any regional cost or service advantage.
+
+---
+
+### 5.4 Seller Performance
+
+<div align="center">
+<img width="440" src="images/dashboard-seller-category.png" alt="Seller revenue by category chart — placeholder" />
+<img width="440" src="images/dashboard-seller-tier.png" alt="Seller SLA by tier chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| SLA breach spread across 2,000 sellers | **0% – 22.99%** | Widest spread of any mart in this project — far beyond carrier (1.2 pt) or region (0.3 pt) spreads |
+| Sellers above 15% breach | **10 sellers** | Worst offender pulls ₹8.9M in revenue while breaching 22.62% of shipments — high value, high risk, simultaneously |
+| Avg. breach by tier | Premium 6.76% (best) | Still doesn't fully explain the spread — poor performers appear inside every tier |
+
+**So what:** seller dispatch behavior is a real, isolable risk factor that no carrier or warehouse dashboard would ever surface on its own.
+
+---
+
+### 5.5 Financial Impact
+
+<div align="center">
+<img width="700" src="images/dashboard-financial-split.png" alt="Financial spend split chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Total logistics spend | **₹98.57M** | Across 499,500 shipments, ~₹197/shipment average |
+| Cost of SLA-breached shipments | **₹6.88M (6.98% of spend)** | 34,811 shipments missed SLA |
+| Avg. cost — breached vs. on-time shipment | ₹197.77 vs. ₹197.24 | **Virtually identical** — no financial penalty exists anywhere for a failed delivery |
+
+**So what:** this is the single most directly fixable finding in the dataset — a performance-linked carrier contract targets exactly this gap.
+
+---
+
+### 5.6 Enterprise Overview (Daily Trend, 2022–2025)
+
+<div align="center">
+<img width="700" src="images/dashboard-overview-trend.png" alt="Overview monthly trend chart — placeholder" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Avg. daily orders | 342 | Peak day: 786 orders |
+| Avg. SLA breach | 6.95% | Peak day: **13.08%** — nearly double baseline |
+| Year-over-year order volume | Flat (124,577–125,466 orders/year) | Not a growth story — the network's own baseline demand is enough to stress it |
+
+**So what:** peak-day failures happen without a growth trend to explain them, which points to a process-elasticity problem (labor, pickup cadence) rather than a scale problem.
+
+---
+
+## 6. Recommendations
+
+Prioritized by impact vs. effort — the same triage a real budget cycle applies.
+
+**Do first — low effort, real impact**
+- Score sellers on SLA performance and act on the worst 10 specifically, rather than a blanket policy across all 2,000
+- Move to performance-linked carrier contracts — a breached shipment currently costs the same as a successful one
+- Cap Premium carrier usage to shipments where speed genuinely matters, given the 5.8× cost gap isn't buying reliability
+- Route by shipment weight, not tier alone, so heavy shipments default to cheaper cost-per-kg carriers
+
+**Next — bigger lift, still high value**
+- Evaluate warehouse network consolidation given 1.87% average utilization
+- Rebalance inventory toward where demand actually concentrates (South/North) instead of where it currently sits (East)
+- Build a peak-day operating mode (added labor, faster pickup cadence) instead of assuming idle capacity absorbs demand spikes on its own
+- Move the highest-risk sellers toward managed/company-controlled fulfillment
+
+**Longer horizon**
+- Move to volume- or zone-based carrier pricing instead of a flat national rate
+- Let future warehouse investment follow demand data instead of uniform geographic coverage
+- Build toward dynamic, rules-based carrier allocation instead of static tier routing
+
+**The through-line:** almost none of this requires new capital. It requires using the infrastructure that already exists differently — which is usually the recommendation that gets funded first, because it doesn't ask for a bigger budget, it asks for better discipline.
+
+---
+
+## 7. Tech Stack, Architecture & Code
 
 | Layer | Tool | Notes |
 |---|---|---|
-| Data generation | Python | Builds the operational entities and injects the anomalies described below |
+| Data generation | Python | Builds operational entities and injects realistic anomalies |
 | Raw storage | Parquet | Immutable Bronze source |
 | Warehouse | DuckDB | Embedded OLAP — see note below |
-| Transformation | dbt Core | Tests, docs, and lineage that a raw SQL script doesn't give you |
+| Transformation | dbt Core | Tests, docs, and lineage a raw SQL script doesn't give you |
 | Orchestration | Apache Airflow (in Docker) | Local orchestration, not a managed cloud instance |
-| Governance | dbt schema tests (YAML) | Enforced contracts between layers |
-| Reporting | HTML dashboard (Power BI planned) | See [What's Next](#whats-next) |
+| Governance | dbt schema tests (YAML) | Enforced contracts between Bronze/Silver/Gold |
+| Reporting | Interactive HTML dashboard | See `/dashboards` |
 
-**On DuckDB vs. a cloud warehouse:** I originally built this against Snowflake, and moved to DuckDB when my trial access ran out. It turned out to be a reasonable trade for a local portfolio project — same SQL dialect ergonomics, zero infrastructure to manage, fast enough for this data volume — but it's an embedded engine, not a distributed cloud warehouse, and I'm not pretending otherwise. The dbt models don't reference anything DuckDB-specific, so pointing this project at Snowflake or BigQuery is a config change, not a rewrite.
+**On DuckDB vs. a cloud warehouse:** this project was originally built against Snowflake and moved to DuckDB once trial access ran out. For a local portfolio build it's a reasonable trade — same SQL ergonomics, zero infrastructure to manage — but it's an embedded engine, not a distributed cloud warehouse, and the dbt models don't reference anything DuckDB-specific. Pointing this project at Snowflake or BigQuery is a config change, not a rewrite.
 
----
-
-## Data Model
-
-7 dimensions, 4 facts, 6 Gold marts. Standard star schema.
-
-```
-dim_customers (SCD2)   ┐
-dim_products           ├──► fct_orders ──┐
-dim_sellers            │    fct_order_items
-dim_carriers (SCD2)    │    fct_shipments ──┐
-dim_warehouses         │    fct_tracking_events
-dim_regions            │                     │
-dim_date               ┘                     ▼
-                                    6 Gold marts
-```
-
-`dim_customers` and `dim_carriers` use SCD Type 2 — meaning a change to a customer's segment or a carrier's tier is preserved as history rather than overwritten. In a real business this matters for reconstructing "what did we know at the time." In this simulated dataset it's genuinely simpler than that: the generator writes synthetic change events into these two dimensions specifically so the SCD2 logic has something real to track. I'll say that plainly if asked in an interview — the pattern is implemented correctly, the trigger for it is manufactured, and I know the difference.
-
-### Gold marts, verified against the actual exported files
-
-| Mart | Grain | Records | Columns |
-|---|---|---|---|
-| `mart_logistics_overview` | Daily | 1,461 | 21 |
-| `mart_carrier_performance` | Carrier | 25 | 13 |
-| `mart_warehouse_performance` | Warehouse | 120 | 19 |
-| `mart_region_performance` | Region | 5 | 11 |
-| `mart_seller_performance` | Seller | 2,000 | 19 |
-| `mart_financial_impact` | Enterprise summary | 1 | 15 |
-
-Every row/column count above is a direct recount from the CSVs in this repo, not something carried over from an earlier draft.
-
----
-
-## Data Quality & Governance
-
-I built anomalies into the data on purpose — missing references, duplicate events, future-dated records, negative quantities — because a warehouse that only ever sees clean data doesn't prove you can handle governance. The rule I followed: preserve everything in Bronze, keep anomalies visible in Silver for investigation, and only let clean, business-valid rows reach Gold.
-
-| Anomaly | What it simulates | Silver | Gold |
-|---|---|---|---|
-| Missing customer reference | Delayed CRM sync | Kept | Excluded from customer KPIs |
-| Missing warehouse assignment | Unallocated shipment | Kept | Excluded from warehouse mart |
-| Future-dated orders | Timezone/clock sync issues | Kept | Excluded from trend KPIs |
-| Duplicate tracking events | Event-stream replay | Kept | Aggregated |
-| Missing product references | Catalog sync failure | Kept | Excluded where required |
-| Negative quantities | Transaction correction | Kept | Excluded from revenue |
-
-I re-ran the null and duplicate checks myself rather than trusting the old docs:
-
-| Mart | Nulls | Duplicates | Grain confirmed |
-|---|---|---|---|
-| Overview | 0 | 0 | 1,461 unique dates, 2022–2025, no gaps |
-| Carrier | 0 | 0 | 25 unique carriers |
-| Warehouse | 0 | 0 | 120 unique warehouses |
-| Region | 0 | 0 | 5 unique regions |
-| Seller | 0 | 0 | 2,000 unique seller IDs |
-| Financial | 0 | 0 | 1 enterprise row |
-
-Business rules — shipment volume ≥ 0, revenue ≥ 0, utilization and SLA breach between 0–100%, transit days > 0, seller ratings 1–5 — all passed dbt's generic and custom tests.
-
-> 📸 `images/vscode_project_structure.png` — placeholder, project structure + dbt schema tests
-
-**One thing I noticed and didn't smooth over:** regional shipment totals differ by under 1% depending on whether you roll them up from the warehouse's region or the customer's region on the order — those aren't always the same, and I left both readings visible rather than forcing them to agree.
-
----
-
-## Findings, Mart by Mart
-
-Same caveat as above applies to everything in this section: these are patterns in the simulated dataset, described the way I'd describe real ones.
-
-### Carriers
-
-25 carriers, 4 tiers. Standard and Express carriers carry roughly three-quarters of all volume — FedEx and BlueDart alone move about 27,000 shipments each. Premium carriers (TCIExpress, Trackon, Borzo, Aramex) handle the least volume but charge ₹41/kg on average against Economy's ₹7.1/kg — 5.8x the cost.
-
-SLA breach rates, though, barely move by tier: Economy averages 6.99%, Express 6.91%, Premium 7.22%. Aramex is the single worst performer at 7.73%; Borzo the best at 6.55%. Transit time scales exactly the way you'd expect by tier (Premium ~1.6 days up to Economy ~8.5 days) — carriers deliver on speed, not on reliability, and the tiers don't actually separate on the metric that matters most.
-
-### Warehouses
-
-120 facilities, average utilization 1.87%, peak 5.53%. Not a typo — the network is running at a fraction of its built capacity. East India runs the hottest (4.18% utilization); West the coolest (0.90%). Warehouse rating has essentially zero correlation with SLA breach (-0.002), and utilization itself barely correlates with it either (0.017). Some of the highest-rated Tier 1 facilities — Delhi, Chennai, Mumbai — post some of the worst SLA numbers in the network.
-
-So it's not a capacity story. Whatever's driving delivery failures, it isn't "warehouses are too full" or "the low-rated ones are dragging things down."
-
-### Regions
-
-South (130,844 shipments) and North (130,092) together make up 53% of national volume; Central is the smallest market at 50,174. Yet shipping cost, cost/kg, and transit time barely move across regions — everything sits within a tight band regardless of local demand density. SLA breach ranges from 6.80% (Central, best) to 7.07% (East, worst) — a real but modest spread.
-
-Translation: this is one national operating model applied everywhere, whether or not the local market actually looks the same.
-
-### Sellers
-
-2,000 sellers. SLA breach ranges from 0% to 22.99% — by far the widest spread of any mart in this project, well beyond what carriers or warehouses show. Ten sellers sit above 15% breach; the worst, at 22.99%, and another at 22.62% while still pulling in ₹8.9M in revenue — high value, high risk, at the same time. Tier helps a little (Premium sellers average 6.76% breach, best of the three) but doesn't fully explain the spread; bad-performing sellers show up inside every tier.
-
-### Financial impact
-
-Total spend: ₹98.57M across 499,500 shipments, ~₹197 per shipment. The 34,811 shipments that missed SLA cost ₹6.88M — 6.98% of total spend — and cost, on average, almost exactly the same per shipment as the ones that didn't breach (₹197.77 vs. ₹197.24). There's no financial penalty built in anywhere for a failed delivery.
-
-### Overview (daily trend, 2022–2025)
-
-Average 342 orders/day, peak 786. Average SLA breach 6.95%, peak day 13.08% — nearly double. Order volume is flat year over year (each year lands between 124,577 and 125,466 orders), so this isn't a growth story — the network's own baseline demand is enough to stress it on its worst days.
-
----
-
-## Cross-Mart Synthesis
-
-Each mart above holds up fine on its own. Read together, they tell a different story than any one of them tells alone — this is the part of the exercise I found most useful to actually do, not just claim I did.
-
-**Idle infrastructure, active failures.** Warehouses sit at 1.87% average utilization. SLA breach still averages 6.95% and spikes to 13.08%. If capacity were the constraint, it wouldn't look like this. Something else is driving the failures.
-
-**Demand and infrastructure aren't looking at the same map.** South and North are the two biggest markets, and South runs at 1.17% utilization. East India, a mid-sized market by comparison, runs hot at 4.18% utilization *and* posts the network's worst SLA number. Kolkata and Patna — both East India — are among the busiest facilities in the whole network. Inventory isn't sitting where the demand is.
-
-**Premium price, average reliability.** Already covered above, but it's worth repeating in context: 5.8x the cost for a tier of service that doesn't clear a statistically meaningful reliability bar over Economy.
-
-**Seller behavior is a separate risk axis.** Warehouses are idle, carriers are consistent — by elimination, the 0–22.99% spread on the seller side is doing a lot of the work here, and it's invisible if you're only looking at carrier or warehouse dashboards.
-
-**Peak days break the network without breaking capacity.** SLA breach nearly doubles on the busiest days while warehouse capacity is nowhere close to maxed out even then. The bottleneck on those days is process — labor, pickup cadence, how fast things move — not physical space.
-
-**Flat pricing at real volume.** ₹197/shipment barely moves across 499,500 annual shipments, four years, five regions. At that scale, flat per-shipment pricing suggests the carrier contracts aren't structured around volume at all.
-
-If I had to compress this into one sentence for an interview: *the network has enough infrastructure, stable carriers, and predictable demand — the problem is where things are allocated, not how much of them exist.*
-
----
-
-## Recommendations, If This Were Real
-
-Prioritized the way I'd actually triage a findings list — impact against effort — not because a template told me to, but because that's the question an exec actually asks.
-
-**Do first (low effort, real impact):**
-- Score sellers on SLA performance and hold the worst 10 accountable specifically, rather than applying blanket policy across all 2,000
-- Tie carrier payment to performance — right now a breached shipment costs the same as a successful one
-- Cap Premium carrier usage to shipments where speed genuinely matters, given the cost gap isn't buying reliability
-- Route by weight, not just tier, so heavy shipments default to the cheaper cost-per-kg carriers
-
-**Worth doing next (bigger lift, still high value):**
-- Actually look at consolidating warehouse footprint given 1.87% average utilization
-- Rebalance inventory toward where demand actually is (South/North) instead of where it currently sits (East)
-- Build a peak-day operating mode — more labor, faster pickup cadence — instead of assuming idle capacity will absorb the spike on its own
-- Move high-risk sellers toward managed fulfillment rather than leaving dispatch timing entirely up to them
-
-**Longer horizon:**
-- Move toward volume- or zone-based carrier pricing instead of a flat national rate
-- Let future warehouse investment follow actual demand data instead of uniform geographic coverage
-- Build toward dynamic, rules-based carrier allocation instead of static tier routing
-
-The through-line: almost none of this needs new capital. It needs the existing infrastructure used differently. That's usually the recommendation that actually gets funded, because it doesn't ask for a bigger budget — it asks for better discipline.
-
----
-
-## A Real Bug I Hit
-
-This part isn't simulated. Early on, the Airflow DAG failed at the `dbt_build` step on five separate runs, inconsistently — no code changes between the failing and succeeding runs, which is the most annoying kind of bug to chase because it looks like flakiness instead of an actual defect.
-
-The cause: dbt resolves its DuckDB path and project directory through `profiles.yml`, which pulls from environment variables. On my Windows machine, those variables resolved to Windows-style paths that worked fine locally. Inside the Docker container running on Linux — which is where Airflow actually executes the DAG — those same variables either weren't set or pointed at paths that don't exist on a Linux filesystem. `dbt debug` would sometimes pass anyway (using a stale or partially-correct path), and then `dbt build` would fail once it actually tried to read or write the DuckDB file.
-
-It wasn't a task-ordering problem — `load_bronze → dbt_debug → dbt_build → export_gold` was dependency-correct the whole time. It was an environment-parity problem: dev and orchestrated execution were quietly resolving different physical paths from the same config.
-
-Fix: pulled every path reference out of hardcoded values and into environment variables injected at container runtime via `docker-compose.yml`, and kept `dbt debug` as its own explicit DAG step ahead of `dbt build` so a bad connection fails immediately and visibly instead of surfacing three steps later as a confusing build error. Then I tore the whole Docker environment down and rebuilt it from scratch a few times to confirm it wasn't a fluke.
-
-The general lesson, beyond this one bug: "works on my machine" is usually an environment-variable problem wearing a disguise.
-
----
-
-## Limitations
-
-- Every dataset here is synthetic, generated by a Python script I wrote — restated one more time because it matters and because I'd rather over-disclose than have someone find out mid-interview.
-- The dashboard layer (HTML now, Power BI planned) isn't built yet — everything in this README was checked against the raw Gold CSVs directly, not a dashboard.
-- Regional shipment totals differ by under 1% depending on aggregation path — noted above, not hidden.
-- This reflects one pipeline run, one point in time. A production version would track KPI drift across runs, not just a single snapshot.
-- Airflow here runs locally in Docker. It proves I can build and debug a real DAG; it doesn't claim experience running orchestration at cloud/production scale.
-
----
-
-## Repository Structure
-
+**Repository structure:**
 ```
 marketplace-logistics-intelligence-platform/
-│
-├── data/
-│   ├── bronze/              # raw synthetic Parquet
-│   └── gold/                # exported Gold mart CSVs
-│
-├── python/
-│   ├── generators/
-│   ├── exports/
-│   └── utilities/
-│
-├── warehouse/
-│   └── logistics.duckdb
-│
-├── dbt/
-│   └── logistics_project/
-│       └── models/
-│           ├── bronze/
-│           ├── silver/{staging,dimensions,facts}
-│           └── gold/
-│
-├── airflow/
-│   ├── dags/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-│
-├── docs/
+├── data/{bronze, gold}
+├── python/{generators, exports, utilities}
+├── warehouse/logistics.duckdb
+├── dbt/logistics_project/models/{bronze, silver, gold}
+├── airflow/{dags, Dockerfile, docker-compose.yml}
+├── dashboards/            # interactive HTML BI console
+├── docs/                  # full technical documentation (see below)
 ├── images/
-├── dashboards/
 ├── README.md
-├── SETUP.md
-└── requirements.txt
+└── SETUP.md
 ```
 
+**Full technical documentation** (kept out of this README so it stays scannable):
+
+| Document | What's in it |
+|---|---|
+| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, Airflow DAG design, and the dbt/`profiles.yml` environment-parity bug I hit and fixed during orchestration |
+| [`docs/data_model.md`](./docs/data_model.md) | ERD, star schema, SCD Type 2 design and rationale |
+| [`docs/data_quality_audit.md`](./docs/data_quality_audit.md) | Full data quality framework, anomaly injection and handling rules |
+| [`docs/data_dictionary.md`](./docs/data_dictionary.md) | Column-level definitions for every Gold mart |
+| [`docs/project_structure.md`](./docs/project_structure.md) | Repository layout and folder responsibilities |
+| [`SETUP.md`](./SETUP.md) | How to reproduce the full pipeline locally |
+
 ---
 
-## What's Next
+## 8. Caveats & Assumptions
 
-- Build the HTML dashboard (in progress) covering all six marts
-- Swap in real screenshots for the placeholders in this README
-- Track KPIs across multiple pipeline runs instead of one snapshot
-- Point the dbt project at Snowflake instead of DuckDB, since the models were written to not depend on anything DuckDB-specific
-- Extend seller risk beyond SLA breach % into something closer to a composite risk score
+- **All data is synthetic.** Every figure above — the ₹98.57M spend, the 6.97% breach rate, the 22.99% seller outlier — comes from a dataset I designed and generated myself in Python. It is not a real company's financials, and I'm stating that plainly here rather than letting the findings read as market research.
+- **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), the orchestration bug actually hit and fixed (`docs/project_architecture.md`), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
+- **Regional shipment totals** differ by under 1% depending on whether they're rolled up from a warehouse's fulfillment region or a customer's order region — those aren't always the same entity, and both readings are left visible rather than forced to reconcile.
+- **This reflects one pipeline run, one point in time.** A production version would track KPI drift across runs, not a single snapshot.
+- **Airflow runs locally in Docker**, not on managed cloud infrastructure. It demonstrates the ability to build and debug a real DAG; it does not claim production-scale orchestration experience.
+- **SCD Type 2** is implemented correctly on `dim_customers` and `dim_carriers`, but the underlying change events are synthetically generated so the logic has something to track — happy to walk through that distinction directly.
 
 ---
 
-If you want to walk through any specific number, decision, or the bug above in more depth, I'm glad to.
+<p align="center"><sub>Questions about any specific number, design decision, or the engineering bug above — happy to walk through it.</sub></p>
