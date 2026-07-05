@@ -27,18 +27,6 @@
 
 ---
 
-## Table of Contents
-1. [Background & Overview](#1-background--overview)
-2. [Objective](#2-objective)
-3. [Data Structure & Initial Checks](#3-data-structure--initial-checks)
-4. [Executive Summary](#4-executive-summary)
-5. [Insights Deep Dive](#5-insights-deep-dive)
-6. [Recommendations](#6-recommendations)
-7. [Tech Stack, Architecture & Code](#7-tech-stack-architecture--code)
-8. [Caveats & Assumptions](#8-caveats--assumptions)
-
----
-
 ## 1. Background & Overview
 
 I'm approaching this project the way an analytics engineer would approach a first-week engagement with a new logistics client: don't trust the dashboards that already exist, rebuild the data model from the ground up, validate it, and only then start forming opinions about what's actually happening operationally.
