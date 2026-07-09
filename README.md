@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="140px" src="images/logo.png" alt="Logistics Group logo — placeholder, swap for your real logo file" />
+  <img width="140px" src="images/logo.jpg" alt="Logistics Group logo — placeholder, swap for your real logo file" />
 </div>
 
 <h1 align="center">Marketplace Logistics Intelligence Platform</h1>
@@ -21,7 +21,7 @@
 
 > **What this is:** a self-generated ~500K-shipment logistics dataset, built into a governed dbt/DuckDB warehouse, analyzed the way an operations consultant would — not "here's a dashboard" but "here's why the numbers look this way, and what I'd fix first."
 >
-> **What to do with this page:** skim the Executive Summary for the headline finding and the money number. If that lands, read the Insights section for the evidence. If you're evaluating engineering depth, jump to [Tech Stack, Architecture & Code](#tech-stack-architecture--code) — full technical documentation lives in `/docs`, linked at the bottom.
+> **What to do with this page:** skim the Executive Summary for the headline finding and the money number. If that lands, read the Insights section for the evidence. If you're evaluating engineering depth, jump to [Tech Stack, Architecture & Code](#7-tech-stack-architecture--code) — full technical documentation lives in `/docs`, linked at the bottom.
 >
 > **The one thing worth remembering:** premium carriers in this dataset cost **5.8× more per kg** than economy carriers for **statistically identical** on-time performance. That single number is the throughline for most of the recommendations below.
 
@@ -83,7 +83,7 @@ The warehouse follows a **Medallion Architecture** (Bronze → Silver → Gold) 
 | Referential integrity (Orders↔Customers, Shipments↔Carriers/Warehouses, etc.) | **Passed** via dbt tests |
 | Business-rule bounds (utilization 0–100%, ratings 1–5, costs ≥ 0, etc.) | **Passed** via dbt tests |
 
-I re-ran the null, duplicate, and grain checks myself directly against the exported CSVs before writing a single insight below — see [Section 8](#8-caveats--assumptions) for the one discrepancy I found and chose to disclose rather than quietly fix.
+I re-ran the null, duplicate, and grain checks myself directly against the exported CSVs before writing a single insight below — see [Section 8](#8-caveats--assumptions) for the discrepancies I found and chose to disclose rather than quietly fix.
 
 Full ERD, table-level grain, and SCD2 design notes: **`docs/data_model.md`**
 
@@ -161,11 +161,13 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 
 | Business Metric | Value | Historical / Comparative Trend |
 |---|---|---|
-| South + North share of national volume | **53%** (130,844 + 130,092 shipments) | Central is the smallest market at 50,174 |
+| South + North share of regional volume¹ | **53%** (130,844 + 130,092 shipments) | Central is the smallest market at 50,174 |
 | Cost per kg, transit time, avg. cost | Nearly flat nationwide (~₹9.72/kg, ~4.92 days, ~₹197) | Same operating model regardless of local demand density |
 | SLA breach range | 6.80% (Central, best) → 7.07% (East, worst) | Modest spread, but meaningful at this shipment volume |
 
 **So what:** one national playbook is being run everywhere, whether or not the local market looks the same — which forfeits any regional cost or service advantage.
+
+¹ *Computed against the Region mart's own total (492,002 shipments), which differs slightly from the 499,500-shipment total used elsewhere — see [Caveats & Assumptions](#8-caveats--assumptions).*
 
 ---
 
@@ -209,7 +211,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 | Business Metric | Value | Historical / Comparative Trend |
 |---|---|---|
 | Avg. daily orders | 342 | Peak day: 786 orders |
-| Avg. SLA breach | 6.95% | Peak day: **13.08%** — nearly double baseline |
+| Avg. SLA breach | 6.97% | Peak day: **13.08%** — nearly double baseline |
 | Year-over-year order volume | Flat (124,577–125,466 orders/year) | Not a growth story — the network's own baseline demand is enough to stress it |
 
 **So what:** peak-day failures happen without a growth trend to explain them, which points to a process-elasticity problem (labor, pickup cadence) rather than a scale problem.
@@ -287,7 +289,7 @@ marketplace-logistics-intelligence-platform/
 
 - **All data is synthetic.** Every figure above — the ₹98.57M spend, the 6.97% breach rate, the 22.99% seller outlier — comes from a dataset I designed and generated myself in Python. It is not a real company's financials, and I'm stating that plainly here rather than letting the findings read as market research.
 - **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), the orchestration bug actually hit and fixed (`docs/project_architecture.md`), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
-- **Regional shipment totals** differ by under 1% depending on whether they're rolled up from a warehouse's fulfillment region or a customer's order region — those aren't always the same entity, and both readings are left visible rather than forced to reconcile.
+- **Shipment totals don't fully agree across marts, and that's disclosed, not hidden.** Carrier and Financial marts total 499,500 shipments; Warehouse totals 494,505 (−1.0%); Overview totals 493,940 (−1.1%); Region totals 492,002 (−1.5%). This follows each mart's own governance rules (a shipment with no assigned warehouse is excluded from the Warehouse mart, no assigned region excluded from the Region mart, etc. — see `docs/data_quality_audit.md`) rather than being an error. Practically: any "% of volume" figure in the Region section (5.3) is computed against that mart's own 492,002 total, not the 499,500 figure used in the Executive Summary — both are correct for what they're measuring, they're just not the same denominator.
 - **This reflects one pipeline run, one point in time.** A production version would track KPI drift across runs, not a single snapshot.
 - **Airflow runs locally in Docker**, not on managed cloud infrastructure. It demonstrates the ability to build and debug a real DAG; it does not claim production-scale orchestration experience.
 - **SCD Type 2** is implemented correctly on `dim_customers` and `dim_carriers`, but the underlying change events are synthetically generated so the logic has something to track — happy to walk through that distinction directly.
