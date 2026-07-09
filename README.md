@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="1052" height="504" alt="Image" src="https://github.com/user-attachments/assets/c5fcc14f-a054-4b64-9cff-820a77fe606c" />
+  <img width="140px" src="images/logo.png" alt="Logistics Group logo — placeholder, swap for your real logo file" />
 </div>
 
 <h1 align="center">Marketplace Logistics Intelligence Platform</h1>
