@@ -122,8 +122,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.1 Carrier Performance
 
 <div align="center">
-<img width="440" src="images/dashboard-carrier-cost.png" alt="Carrier cost per tier chart — placeholder" />
-<img width="440" src="images/dashboard-carrier-sla.png" alt="Carrier SLA breach per tier chart — placeholder" />
+<img width="1314" height="636" alt="Image" src="https://github.com/user-attachments/assets/14b6095e-454f-4944-98e6-df5fdbe15963" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -140,8 +139,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.2 Warehouse Performance
 
 <div align="center">
-<img width="440" src="images/dashboard-warehouse-utilization.png" alt="Warehouse utilization by region chart — placeholder" />
-<img width="440" src="images/dashboard-warehouse-sla.png" alt="Warehouse SLA vs utilization chart — placeholder" />
+<img width="1305" height="644" alt="Image" src="https://github.com/user-attachments/assets/4eb3ad3c-d9fc-4eae-b597-6d3ad06b367b" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -158,8 +156,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.3 Region Performance
 
 <div align="center">
-<img width="440" src="images/dashboard-region-volume.png" alt="Region shipment volume chart — placeholder" />
-<img width="440" src="images/dashboard-region-sla.png" alt="Region SLA breach chart — placeholder" />
+<img width="1312" height="604" alt="Image" src="https://github.com/user-attachments/assets/a953e6d7-b7e5-49a0-adc2-4ac676c6c5cb" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -175,8 +172,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.4 Seller Performance
 
 <div align="center">
-<img width="440" src="images/dashboard-seller-category.png" alt="Seller revenue by category chart — placeholder" />
-<img width="440" src="images/dashboard-seller-tier.png" alt="Seller SLA by tier chart — placeholder" />
+<img width="1320" height="647" alt="Image" src="https://github.com/user-attachments/assets/86502fad-baa5-4410-8028-4acdaad24c38" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -192,7 +188,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.5 Financial Impact
 
 <div align="center">
-<img width="700" src="images/dashboard-financial-split.png" alt="Financial spend split chart — placeholder" />
+<img width="1302" height="641" alt="Image" src="https://github.com/user-attachments/assets/b48331d0-bc14-41b6-bb03-22435c0c7c69" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
