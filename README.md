@@ -204,7 +204,6 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.6 Enterprise Overview (Daily Trend, 2022–2025)
 
 <div align="center">
-<img width="700" src="images/dashboard-overview-trend.png" alt="Overview monthly trend chart — placeholder" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
