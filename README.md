@@ -1,907 +1,297 @@
-<!-- ========================================================= -->
+<div align="center">
+  <img width="140px" src="images/logo.png" alt="Logistics Group logo — placeholder, swap for your real logo file" />
+</div>
 
-<!-- HERO BANNER -->
-
-<!-- ========================================================= -->
-
-<p align="center">
-
-# Marketplace Logistics Intelligence Platform
-
-### Root Cause Analysis of Delivery Delays, SLA Breaches & Logistics Cost Optimization
-
-**Enterprise Analytics Engineering Project**
-
-*Transforming fragmented logistics operations into executive decision intelligence through modern Analytics Engineering, governed data modeling, and business focused analytics.*
-
-</p>
-
----
-
-<!-- HERO IMAGE -->
+<h1 align="center">Marketplace Logistics Intelligence Platform</h1>
+<h3 align="center">Executive Diagnostic Report — Simulated National Logistics Network</h3>
 
 <p align="center">
-
-> **[ HERO BANNER PLACEHOLDER ]**
-
-`images/banner/repository-hero-banner.png`
-
+  <img alt="status" src="https://img.shields.io/badge/status-portfolio_case_study-1E56C7">
+  <img alt="data" src="https://img.shields.io/badge/data-synthetic_%2F_self_generated-8B98AE">
+  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_Airflow_%7C_Docker-1E56C7">
+  <img alt="quality" src="https://img.shields.io/badge/data_quality-0_nulls_%7C_0_duplicates-12A879">
 </p>
 
----
-
-<!-- DASHBOARD PREVIEW -->
-
-<p align="center">
-
-> **Executive Operations Dashboard Preview**
-
-`images/dashboard/dashboard-overview.png`
-
-</p>
+<p align="center"><b>Saswata Ghosh</b> · Analytics Engineer / Data Analyst<br>
+<a href="https://github.com/Saswataghosh06/Marketplace-Logistics-Intelligence-Platform">GitHub Repo</a> · <a href="#">LinkedIn</a> · <a href="#">Email</a> · <a href="./SETUP.md">Reproduce This Project →</a></p>
 
 ---
 
-# Executive Summary
+### Important Note
 
-Modern marketplace platforms generate millions of operational events across customers, sellers, warehouses, carriers, and delivery networks every day. While each operational system captures valuable data, decision makers often struggle to identify where delivery performance begins to deteriorate, which operational bottlenecks drive logistics costs, and how service failures impact customer experience.
-
-The **Marketplace Logistics Intelligence Platform** was designed as an end to end Analytics Engineering solution that transforms raw operational data into trusted business intelligence. Rather than focusing on dashboard development alone, the project demonstrates how modern analytics platforms integrate data engineering, business modeling, governance, and executive reporting into a unified decision support system.
-
-The platform follows a layered Medallion Architecture built using Python, DuckDB, dbt, SQL, and Power BI. Approximately **7.9 million synthetic operational records** were generated to simulate a realistic large scale marketplace environment, including customers, sellers, products, orders, shipments, warehouses, logistics partners, tracking events, and delivery exceptions. Each transformation layer was intentionally designed to mirror enterprise Analytics Engineering practices while preserving realistic operational anomalies for downstream analysis and governance.
-
-The resulting analytics platform enables leadership teams to move beyond descriptive reporting and understand the operational drivers behind delivery delays, SLA breaches, warehouse bottlenecks, carrier performance, regional logistics efficiency, seller impact, and financial exposure.
+> **What this is:** a self-generated ~500K-shipment logistics dataset, built into a governed dbt/DuckDB warehouse, analyzed the way an operations consultant would — not "here's a dashboard" but "here's why the numbers look this way, and what I'd fix first."
+>
+> **What to do with this page:** skim the Executive Summary for the headline finding and the money number. If that lands, read the Insights section for the evidence. If you're evaluating engineering depth, jump to [Tech Stack, Architecture & Code](#tech-stack-architecture--code) — full technical documentation lives in `/docs`, linked at the bottom.
+>
+> **The one thing worth remembering:** premium carriers in this dataset cost **5.8× more per kg** than economy carriers for **statistically identical** on-time performance. That single number is the throughline for most of the recommendations below.
 
 ---
 
-# Why This Project Matters
+## 1. Background & Overview
 
-Marketplace logistics directly influences customer satisfaction, operational efficiency, and profitability. A single delayed shipment may trigger increased logistics costs, customer complaints, seller dissatisfaction, refund requests, and contractual penalties.
+I'm approaching this project the way an analytics engineer would approach a first-week engagement with a new logistics client: don't trust the dashboards that already exist, rebuild the data model from the ground up, validate it, and only then start forming opinions about what's actually happening operationally.
 
-Although organizations collect large volumes of operational data, that information is frequently distributed across multiple business systems, making it difficult to identify the true causes of logistics failures.
+The "client" here is a simulated national e-commerce logistics network — 25 carriers, 120 warehouses, 5 regions, 2,000 marketplace sellers, ~500K shipments across four years (2022–2025). I designed and generated this dataset myself in Python specifically so it would behave like a real operational system: messy in the ways real systems are messy (missing references, late-arriving records, duplicate events), not the clean, pre-solved version you get from a Kaggle download.
 
-This project demonstrates how Analytics Engineering can bridge that gap by transforming fragmented operational data into governed business models that support faster, more informed executive decision making.
-
----
-
-# Business Challenges
-
-The platform was designed to address five operational challenges commonly faced by large marketplace organizations.
-
-| Business Challenge                              | Operational Impact                                         |
-| ----------------------------------------------- | ---------------------------------------------------------- |
-| Limited visibility into carrier performance     | Higher delivery delays and increasing SLA penalties        |
-| Warehouse dispatch bottlenecks                  | Reduced operational efficiency and longer processing times |
-| Regional logistics inconsistency                | Uneven customer experience across markets                  |
-| Limited understanding of logistics cost drivers | Rising operational expenditure                             |
-| Fragmented reporting across operational systems | Slower executive decision making                           |
+On top of that data, I built a governed dimensional warehouse (Bronze → Silver → Gold), orchestrated it with Apache Airflow in Docker, and ran a cross-functional diagnostic across six business-domain marts — Overview, Carrier, Warehouse, Region, Seller, and Financial — to answer the kind of question a COO actually asks, not the kind a tutorial asks.
 
 ---
 
-# Business Questions
+## 2. Objective
 
-Instead of producing generic operational reports, every business mart within this platform was designed to answer a specific executive question.
+The logistics network in this dataset looks adequate on paper: reasonable infrastructure, stable carrier partners, predictable demand. It still misses roughly **7% of delivery commitments**, and no single team's dashboard explains why.
 
-| Business Question                                              | Business Value                       | Executive Decision                                    |
-| -------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------- |
-| Which carriers contribute most to SLA breaches?                | Improve delivery reliability         | Review carrier performance and contractual agreements |
-| Which warehouses create dispatch bottlenecks?                  | Increase warehouse efficiency        | Optimize staffing and warehouse operations            |
-| Which customer regions experience the highest delivery delays? | Improve customer experience          | Allocate logistics capacity strategically             |
-| What financial impact do SLA breaches create?                  | Reduce operational costs             | Prioritize high impact operational improvements       |
-| Which sellers are most affected by logistics performance?      | Strengthen marketplace relationships | Support sellers experiencing logistics constraints    |
+**The objective of this project is to answer one question with evidence, not assumption:**
 
----
+> *If the infrastructure looks fine, why isn't performance matching it — and with a limited budget, what gets fixed first?*
 
-# Project Highlights
+That question sits at the intersection of five roles — data engineer, BI analyst, business analyst, operations consultant, and finance — so the project was built to hold up under any of those lenses, not just one.
 
-| Metric                        |                      Value |
-| ----------------------------- | -------------------------: |
-| Synthetic Operational Records |           **~7.9 Million** |
-| Customer Orders               |                **500,000** |
-| Shipment Records              |                **500,000** |
-| Tracking Events               |           **5.3+ Million** |
-| Business Marts                | **6 Executive Gold Marts** |
-| Analytics Architecture        | **Bronze → Silver → Gold** |
+**Business questions this project answers:**
+- Which carriers are worth the money, and which aren't?
+- Are warehouses actually the bottleneck — or is the constraint somewhere upstream?
+- Does inventory sit where customer demand actually is?
+- Which sellers create delivery risk that a carrier or warehouse report alone would never surface?
+- What does a missed SLA cost in currency, not just in percentage points?
 
 ---
 
-# Business Value Delivered
+## 3. Data Structure & Initial Checks
 
-The Marketplace Logistics Intelligence Platform demonstrates how modern Analytics Engineering supports executive decision making by:
+The warehouse follows a **Medallion Architecture** (Bronze → Silver → Gold) with a **Star Schema** dimensional model: 7 conformed dimensions, 4 fact tables, 6 Gold marts.
 
-* Transforming fragmented logistics operations into governed business intelligence.
-* Identifying the operational drivers behind delivery delays and SLA breaches.
-* Measuring the financial impact of logistics performance.
-* Providing standardized executive KPIs across multiple operational domains.
-* Supporting evidence based operational improvements through interactive analytics.
+<div align="center">
+<table>
+<tr>
+<td width="50%" align="center"><b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
+<img width="420" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
+</td>
+<td width="50%" align="center"><b>Airflow Orchestration DAG</b><br><sub>4-task pipeline, all green</sub><br><br>
+<img width="420" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" alt="Airflow DAG success run" />
+</td>
+</tr>
+</table>
+</div>
 
-Rather than focusing solely on reporting historical performance, the platform establishes a scalable analytical foundation that enables leadership teams to identify operational inefficiencies before they become larger business problems.
+**Initial checks performed before any analysis began** (full methodology in `docs/data_quality_audit.md`):
+
+| Check | Result |
+|---|---|
+| Missing values across all 6 Gold marts | **0** |
+| Duplicate records across all 6 Gold marts | **0** |
+| Grain validated per mart (1 row per entity) | **Confirmed** — daily, carrier, warehouse, region, seller, enterprise |
+| Referential integrity (Orders↔Customers, Shipments↔Carriers/Warehouses, etc.) | **Passed** via dbt tests |
+| Business-rule bounds (utilization 0–100%, ratings 1–5, costs ≥ 0, etc.) | **Passed** via dbt tests |
+
+I re-ran the null, duplicate, and grain checks myself directly against the exported CSVs before writing a single insight below — see [Section 8](#8-caveats--assumptions) for the one discrepancy I found and chose to disclose rather than quietly fix.
+
+Full ERD, table-level grain, and SCD2 design notes: **`docs/data_model.md`**
 
 ---
 
-# Platform Architecture
+## 4. Executive Summary
 
-> **[ MEDALLION ARCHITECTURE PLACEHOLDER ]**
+<div align="center">
+<img width="1317" height="644" alt="Image" src="https://github.com/user-attachments/assets/c4e56699-21ad-46d8-ba57-d8005303c2ce" />
+</div>
 
-`images/architecture/medallion-architecture.png`
+<br>
+
+<table align="center">
+<tr>
+<td align="center" width="20%"><h2>1.87%</h2><sub>Avg. warehouse utilization<br>across 120 facilities</sub></td>
+<td align="center" width="20%"><h2>6.97%</h2><sub>Network-wide SLA<br>breach rate</sub></td>
+<td align="center" width="20%"><h2>5.8×</h2><sub>Premium vs. Economy<br>carrier cost per kg</sub></td>
+<td align="center" width="20%"><h2>₹6.88M</h2><sub>Cost of SLA-breached<br>shipments (of ₹98.6M spend)</sub></td>
+<td align="center" width="20%"><h2>0–23%</h2><sub>Seller SLA breach<br>spread (2,000 sellers)</sub></td>
+</tr>
+</table>
+
+**Headline finding:** the network is not capacity-constrained. It's allocation-constrained. Warehouses run at under 2% of built capacity while SLA breaches still spike to 13% on peak days; premium carriers cost 5.8× more without delivering measurably better reliability; and a 23-point SLA spread across sellers is invisible to anyone only looking at carrier or warehouse reports.
+
+**Bottom line:** almost every recommendation in this report is an allocation and accountability fix, not a capital request — which is usually the recommendation that gets funded fastest.
+
+Full findings, by mart, with the evidence behind each number, are in Section 5.
 
 ---
 
-## End to End Analytics Workflow
+## 5. Insights Deep Dive
 
-```text
-Synthetic Data Generation
-            │
-            ▼
-   Bronze Layer (Parquet Files)
-            │
-            ▼
-      SnowFlake Data Warehouse
-            │
-            ▼
-     dbt Transformation Layer
-            │
-            ▼
-    Gold Business Data Marts
-            │
-            ▼
- Executive Power BI Dashboards
-            │
-            ▼
- Business Insights & Executive Decisions
+*(Every number below is a pattern in the simulated dataset, stated the way I'd state a real one — see [Caveats](#8-caveats--assumptions).)*
+
+### 5.1 Carrier Performance
+
+<div align="center">
+<img width="1314" height="636" alt="Image" src="https://github.com/user-attachments/assets/14b6095e-454f-4944-98e6-df5fdbe15963" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Avg. cost per kg — Premium tier | **₹41.00** | 5.8× Economy tier (₹7.12) |
+| Avg. SLA breach — Premium tier | **7.22%** | Not meaningfully better than Economy (6.99%) or Express (6.91%) |
+| Best / worst carrier by SLA | Borzo 6.55% / Aramex 7.73% | Range across all 25 carriers is under 1.2 points — tight and systemic |
+| Transit time by tier | 1.6 days (Premium) → 8.5 days (Economy) | Scales exactly as designed — carriers execute on speed reliably |
+
+**So what:** carriers differentiate cleanly on speed and not at all on reliability. Paying for Premium buys a faster average, not a safer one.
+
+---
+
+### 5.2 Warehouse Performance
+
+<div align="center">
+<img width="1305" height="644" alt="Image" src="https://github.com/user-attachments/assets/4eb3ad3c-d9fc-4eae-b597-6d3ad06b367b" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Network-wide avg. utilization | **1.87%** | Peak facility utilization is only 5.53% — no facility is close to saturated |
+| Utilization by region | East 4.18% (highest) / West 0.90% (lowest) | 4.6× spread between busiest and quietest region |
+| Correlation: warehouse rating ↔ SLA breach | **-0.002** | Effectively zero — top-rated Tier 1 facilities (Delhi, Chennai, Mumbai) post some of the worst SLA numbers |
+| Correlation: utilization ↔ SLA breach | **0.017** | Also effectively zero — busier facilities aren't the ones failing |
+
+**So what:** this rules out the two easiest explanations (facility quality, facility busyness). Whatever's driving delivery failures is happening upstream of the warehouse floor.
+
+---
+
+### 5.3 Region Performance
+
+<div align="center">
+<img width="1312" height="604" alt="Image" src="https://github.com/user-attachments/assets/a953e6d7-b7e5-49a0-adc2-4ac676c6c5cb" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| South + North share of national volume | **53%** (130,844 + 130,092 shipments) | Central is the smallest market at 50,174 |
+| Cost per kg, transit time, avg. cost | Nearly flat nationwide (~₹9.72/kg, ~4.92 days, ~₹197) | Same operating model regardless of local demand density |
+| SLA breach range | 6.80% (Central, best) → 7.07% (East, worst) | Modest spread, but meaningful at this shipment volume |
+
+**So what:** one national playbook is being run everywhere, whether or not the local market looks the same — which forfeits any regional cost or service advantage.
+
+---
+
+### 5.4 Seller Performance
+
+<div align="center">
+<img width="1320" height="647" alt="Image" src="https://github.com/user-attachments/assets/86502fad-baa5-4410-8028-4acdaad24c38" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| SLA breach spread across 2,000 sellers | **0% – 22.99%** | Widest spread of any mart in this project — far beyond carrier (1.2 pt) or region (0.3 pt) spreads |
+| Sellers above 15% breach | **10 sellers** | Worst offender pulls ₹8.9M in revenue while breaching 22.62% of shipments — high value, high risk, simultaneously |
+| Avg. breach by tier | Premium 6.76% (best) | Still doesn't fully explain the spread — poor performers appear inside every tier |
+
+**So what:** seller dispatch behavior is a real, isolable risk factor that no carrier or warehouse dashboard would ever surface on its own.
+
+---
+
+### 5.5 Financial Impact
+
+<div align="center">
+<img width="1302" height="641" alt="Image" src="https://github.com/user-attachments/assets/b48331d0-bc14-41b6-bb03-22435c0c7c69" />
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Total logistics spend | **₹98.57M** | Across 499,500 shipments, ~₹197/shipment average |
+| Cost of SLA-breached shipments | **₹6.88M (6.98% of spend)** | 34,811 shipments missed SLA |
+| Avg. cost — breached vs. on-time shipment | ₹197.77 vs. ₹197.24 | **Virtually identical** — no financial penalty exists anywhere for a failed delivery |
+
+**So what:** this is the single most directly fixable finding in the dataset — a performance-linked carrier contract targets exactly this gap.
+
+---
+
+### 5.6 Enterprise Overview (Daily Trend, 2022–2025)
+
+<div align="center">
+</div>
+
+| Business Metric | Value | Historical / Comparative Trend |
+|---|---|---|
+| Avg. daily orders | 342 | Peak day: 786 orders |
+| Avg. SLA breach | 6.95% | Peak day: **13.08%** — nearly double baseline |
+| Year-over-year order volume | Flat (124,577–125,466 orders/year) | Not a growth story — the network's own baseline demand is enough to stress it |
+
+**So what:** peak-day failures happen without a growth trend to explain them, which points to a process-elasticity problem (labor, pickup cadence) rather than a scale problem.
+
+---
+
+## 6. Recommendations
+
+Prioritized by impact vs. effort — the same triage a real budget cycle applies.
+
+**Do first — low effort, real impact**
+- Score sellers on SLA performance and act on the worst 10 specifically, rather than a blanket policy across all 2,000
+- Move to performance-linked carrier contracts — a breached shipment currently costs the same as a successful one
+- Cap Premium carrier usage to shipments where speed genuinely matters, given the 5.8× cost gap isn't buying reliability
+- Route by shipment weight, not tier alone, so heavy shipments default to cheaper cost-per-kg carriers
+
+**Next — bigger lift, still high value**
+- Evaluate warehouse network consolidation given 1.87% average utilization
+- Rebalance inventory toward where demand actually concentrates (South/North) instead of where it currently sits (East)
+- Build a peak-day operating mode (added labor, faster pickup cadence) instead of assuming idle capacity absorbs demand spikes on its own
+- Move the highest-risk sellers toward managed/company-controlled fulfillment
+
+**Longer horizon**
+- Move to volume- or zone-based carrier pricing instead of a flat national rate
+- Let future warehouse investment follow demand data instead of uniform geographic coverage
+- Build toward dynamic, rules-based carrier allocation instead of static tier routing
+
+**The through-line:** almost none of this requires new capital. It requires using the infrastructure that already exists differently — which is usually the recommendation that gets funded first, because it doesn't ask for a bigger budget, it asks for better discipline.
+
+---
+
+## 7. Tech Stack, Architecture & Code
+
+| Layer | Tool | Notes |
+|---|---|---|
+| Data generation | Python | Builds operational entities and injects realistic anomalies |
+| Raw storage | Parquet | Immutable Bronze source |
+| Warehouse | DuckDB | Embedded OLAP — see note below |
+| Transformation | dbt Core | Tests, docs, and lineage a raw SQL script doesn't give you |
+| Orchestration | Apache Airflow (in Docker) | Local orchestration, not a managed cloud instance |
+| Governance | dbt schema tests (YAML) | Enforced contracts between Bronze/Silver/Gold |
+| Reporting | Interactive HTML dashboard | See `/dashboards` |
+
+**On DuckDB vs. a cloud warehouse:** this project was originally built against Snowflake and moved to DuckDB once trial access ran out. For a local portfolio build it's a reasonable trade — same SQL ergonomics, zero infrastructure to manage — but it's an embedded engine, not a distributed cloud warehouse, and the dbt models don't reference anything DuckDB-specific. Pointing this project at Snowflake or BigQuery is a config change, not a rewrite.
+
+**Repository structure:**
+```
+marketplace-logistics-intelligence-platform/
+├── data/{bronze, gold}
+├── python/{generators, exports, utilities}
+├── warehouse/logistics.duckdb
+├── dbt/logistics_project/models/{bronze, silver, gold}
+├── airflow/{dags, Dockerfile, docker-compose.yml}
+├── dashboards/            # interactive HTML BI console
+├── docs/                  # full technical documentation (see below)
+├── images/
+├── README.md
+└── SETUP.md
 ```
 
----
+**Full technical documentation** (kept out of this README so it stays scannable):
 
-## Why a Medallion Architecture?
-
-Rather than transforming raw operational data directly into dashboards, the project adopts a Medallion Architecture that separates data ingestion, transformation, and business consumption into independent layers.
-
-This approach improves maintainability, reproducibility, governance, and scalability while reducing downstream reporting complexity.
-
-### Bronze Layer
-
-Stores immutable raw operational datasets generated from the synthetic marketplace environment.
-
-### Silver Layer
-
-Applies schema standardization, business validation, data quality rules, and dimensional modeling while intentionally preserving operational anomalies for governance and downstream analysis.
-
-### Gold Layer
-
-Delivers business ready analytical marts optimized for executive reporting, KPI calculation, and decision support.
+| Document | What's in it |
+|---|---|
+| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, Airflow DAG design, and the dbt/`profiles.yml` environment-parity bug I hit and fixed during orchestration |
+| [`docs/data_model.md`](./docs/data_model.md) | ERD, star schema, SCD Type 2 design and rationale |
+| [`docs/data_quality_audit.md`](./docs/data_quality_audit.md) | Full data quality framework, anomaly injection and handling rules |
+| [`docs/data_dictionary.md`](./docs/data_dictionary.md) | Column-level definitions for every Gold mart |
+| [`docs/project_structure.md`](./docs/project_structure.md) | Repository layout and folder responsibilities |
+| [`SETUP.md`](./SETUP.md) | How to reproduce the full pipeline locally |
 
 ---
 
-# Analytics Engineering Philosophy
+## 8. Caveats & Assumptions
 
-Most business dashboards begin at the reporting layer. This project was intentionally designed from the opposite direction.
-
-Instead of asking **"What charts should be built?"**, the project began with a more fundamental question:
-
-> **"How should operational data be engineered so executives can trust every metric they see?"**
-
-Every architectural decision was therefore made with scalability, governance, reproducibility, and business trust in mind.
-
-The objective was not simply to build dashboards, but to design an analytical platform capable of transforming raw logistics operations into governed executive intelligence.
+- **All data is synthetic.** Every figure above — the ₹98.57M spend, the 6.97% breach rate, the 22.99% seller outlier — comes from a dataset I designed and generated myself in Python. It is not a real company's financials, and I'm stating that plainly here rather than letting the findings read as market research.
+- **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), the orchestration bug actually hit and fixed (`docs/project_architecture.md`), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
+- **Regional shipment totals** differ by under 1% depending on whether they're rolled up from a warehouse's fulfillment region or a customer's order region — those aren't always the same entity, and both readings are left visible rather than forced to reconcile.
+- **This reflects one pipeline run, one point in time.** A production version would track KPI drift across runs, not a single snapshot.
+- **Airflow runs locally in Docker**, not on managed cloud infrastructure. It demonstrates the ability to build and debug a real DAG; it does not claim production-scale orchestration experience.
+- **SCD Type 2** is implemented correctly on `dim_customers` and `dim_carriers`, but the underlying change events are synthetically generated so the logic has something to track — happy to walk through that distinction directly.
 
 ---
 
-# Engineering Decisions
-
-Every technology choice was driven by an operational requirement rather than personal preference.
-
----
-
-## Why Synthetic Data?
-
-Most publicly available ecommerce datasets stop at customer orders.
-
-Very few include:
-
-* Warehouse operations
-* Carrier performance
-* Shipment lifecycle
-* Tracking events
-* Delivery exceptions
-* SLA breaches
-* Reverse logistics
-* Penalty costs
-
-Without these operational datasets, answering logistics questions becomes impossible.
-
-Instead of simplifying the business problem, the project generated an enterprise scale synthetic marketplace environment containing realistic business relationships across multiple operational domains.
-
----
-
-## Why Python?
-
-Python was selected because it provides complete control over realistic data generation.
-
-Instead of randomly generating records, Python was used to simulate actual marketplace operations, including:
-
-* Customer purchasing behaviour
-* Seller inventory
-* Warehouse allocation
-* Carrier assignment
-* Shipment movement
-* Delivery outcomes
-* Operational anomalies
-* SLA failures
-
-The generator intentionally produces business scenarios that resemble production logistics environments.
-
----
-
-## Why Parquet?
-
-The Bronze layer stores immutable datasets as Apache Parquet.
-
-Advantages include:
-
-* Columnar storage
-* Better compression
-* Faster analytical queries
-* Native compatibility with DuckDB
-* Warehouse portability
-
-The Bronze layer therefore behaves similarly to a modern cloud data lake.
-
----
-
-## Why DuckDB?
-
-The architecture was originally designed around Snowflake.
-
-For this portfolio implementation, DuckDB was selected because it provides:
-
-* Embedded analytical database
-* Native Parquet support
-* High performance analytical queries
-* Zero infrastructure setup
-* Fully reproducible local development
-
-Most importantly, the transformation layer remains warehouse agnostic, allowing future migration to Snowflake, BigQuery, or Databricks with minimal changes.
-
----
-
-## Why dbt?
-
-Traditional SQL scripts become difficult to maintain as projects grow.
-
-dbt introduces software engineering practices into analytics development through:
-
-* Modular SQL models
-* Dependency management
-* Documentation
-* Testing
-* Version control
-* Reusable transformations
-
-Rather than writing isolated SQL queries, every transformation becomes part of a governed analytical pipeline.
-
----
-
-## Why a Medallion Architecture?
-
-Operational data changes throughout its lifecycle.
-
-Separating ingestion, transformation, and reporting creates clear ownership at every stage.
-
-| Layer  | Responsibility                                             |
-| ------ | ---------------------------------------------------------- |
-| Bronze | Immutable raw operational data                             |
-| Silver | Business validation, standardization, dimensional modeling |
-| Gold   | Executive KPIs and analytical business marts               |
-
-This separation improves maintainability while preventing reporting logic from contaminating raw operational data.
-
----
-
-## Why Business Marts?
-
-Executives rarely analyse raw transactional tables.
-
-Instead, they ask questions.
-
-Examples include:
-
-* Which carrier performs worst?
-* Which warehouse causes dispatch delays?
-* Which region experiences poor delivery performance?
-* What financial impact do SLA breaches create?
-
-Each Gold Mart was therefore designed around a business decision rather than a database entity.
-
----
-
-# Data Quality Framework
-
-> **[ DATA QUALITY FRAMEWORK PLACEHOLDER ]**
-
-`images/diagrams/data-quality-framework.png`
-
-Reliable analytics begins with reliable data.
-
-Instead of assuming perfect operational data, the project intentionally introduces realistic inconsistencies that mirror production environments.
-
-Examples include:
-
-* Missing values
-* Duplicate records
-* Country inconsistencies
-* Future dates
-* Weight outliers
-* Missing warehouse assignments
-* Missing delivery dates
-* Delivery exceptions
-
-These anomalies allow the transformation layer to demonstrate realistic data governance rather than artificial data cleaning.
-
----
-
-## Bronze Layer Philosophy
-
-The Bronze layer intentionally preserves operational reality.
-
-No business rules are applied.
-
-Raw data remains immutable.
-
-This allows complete traceability back to the original operational records.
-
----
-
-## Silver Layer Philosophy
-
-The Silver layer standardizes operational data while preserving meaningful business anomalies.
-
-Typical transformations include:
-
-* Data type standardization
-* Schema normalization
-* Fact and dimension modeling
-* Surrogate keys
-* Business validations
-* Referential integrity
-* Consistent naming conventions
-
-Rather than hiding operational issues, the Silver layer exposes them for downstream governance.
-
----
-
-## Gold Layer Philosophy
-
-Only trusted business metrics reach the Gold layer.
-
-Each business mart contains executive ready KPIs designed for reporting and strategic decision making.
-
-This ensures every Power BI visualization consumes governed business data rather than raw operational transactions.
-
----
-
-# Gold Business Marts
-
-The analytical layer consists of six business marts.
-
-Each mart answers a specific operational question.
-
----
-
-## Executive Logistics Overview
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-logistics-overview.png`
-
-### Purpose
-
-Provide leadership with a complete operational snapshot of marketplace logistics performance.
-
-### Business Questions
-
-* How many orders were fulfilled?
-* How many shipments were completed?
-* What percentage breached SLA?
-* What are current logistics costs?
-* How are operations trending over time?
-
-### Primary KPIs
-
-* Orders
-* Shipments
-* Revenue
-* SLA Breach %
-* Shipping Cost
-* Transit Time
-
----
-
-## Carrier Performance
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-carrier-performance.png`
-
-### Purpose
-
-Evaluate logistics partner reliability.
-
-### Business Questions
-
-* Which carriers generate the highest delivery delays?
-* Which carrier contributes most to SLA penalties?
-* Which carrier demonstrates consistent performance?
-
-### Primary KPIs
-
-* On Time Delivery %
-* SLA Breach %
-* Delay Days
-* Reliability Score
-* Shipping Volume
-
----
-
-## Warehouse Performance
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-warehouse-performance.png`
-
-### Purpose
-
-Measure warehouse operational efficiency.
-
-### Business Questions
-
-* Which warehouses experience dispatch bottlenecks?
-* Which facilities delay shipments?
-* Which warehouses process orders most efficiently?
-
-### Primary KPIs
-
-* Dispatch Time
-* Shipment Volume
-* Delay Rate
-* Processing Efficiency
-
----
-
-## Regional Performance
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-region-performance.png`
-
-### Purpose
-
-Understand geographical delivery performance.
-
-### Business Questions
-
-* Which regions experience higher delays?
-* Which markets require operational investment?
-* How does logistics performance vary geographically?
-
-### Primary KPIs
-
-* Regional SLA %
-* Transit Time
-* Delay Days
-* Shipment Volume
-
----
-
-## Seller Performance
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-seller-performance.png`
-
-### Purpose
-
-Measure how logistics operations impact marketplace sellers.
-
-### Business Questions
-
-* Which sellers experience the highest logistics disruption?
-* Which sellers require operational support?
-* How does logistics affect seller performance?
-
-### Primary KPIs
-
-* Orders
-* Shipments
-* Delay Rate
-* Revenue
-* Seller Ranking
-
----
-
-## Financial Impact
-
-> **[ PLACEHOLDER ]**
-
-`images/gold-marts/mart-financial-impact.png`
-
-### Purpose
-
-Quantify the business cost of operational inefficiencies.
-
-### Business Questions
-
-* What is the financial impact of SLA breaches?
-* Which operational issues increase logistics costs?
-* Where should investment generate the highest return?
-
-### Primary KPIs
-
-* Shipping Cost
-* Estimated Penalty Cost
-* Revenue
-* Cost Per Shipment
-* Financial Exposure
-
----
-
-# Why These Marts Matter
-
-Instead of organizing analytics around database tables, each mart was designed around an executive decision.
-
-This shifts the analytical model from **data storage** toward **business outcomes**, ensuring every dashboard directly supports operational planning, performance monitoring, and strategic decision making.
-
----
-
-# Executive Dashboard Experience
-
-The Power BI solution was designed using an executive first approach.
-
-Rather than maximizing the number of visualizations, every dashboard answers a focused operational question that supports business decision making.
-
-The dashboard follows a consistent design language across all report pages, emphasizing readability, KPI visibility, business storytelling, and executive usability.
-
----
-
-# Executive Overview Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/executive-overview.png`
-
-## Business Headline
-
-### Logistics Performance Remains Stable, but Delivery Delays Continue to Increase Operating Costs
-
-### Purpose
-
-Provide executives with a single operational view of marketplace logistics performance.
-
-### Questions Answered
-
-* How many orders are being processed?
-* How many shipments have been completed?
-* Are deliveries meeting SLA commitments?
-* How are logistics costs changing?
-* Which operational metrics require immediate attention?
-
-### Executive Decisions Supported
-
-* Monitor overall operational health.
-* Identify deteriorating logistics performance.
-* Prioritize operational improvement initiatives.
-* Track organization wide KPIs.
-
----
-
-# Carrier Performance Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/carrier-performance.png`
-
-## Business Headline
-
-### Carrier Performance Varies Significantly Across Logistics Partners
-
-### Purpose
-
-Measure logistics partner reliability and identify carriers responsible for operational delays.
-
-### Questions Answered
-
-* Which carriers generate the highest SLA breaches?
-* Which carrier delivers most consistently?
-* How do shipping volumes affect carrier performance?
-* Which carriers require operational review?
-
-### Executive Decisions Supported
-
-* Renegotiate carrier contracts.
-* Reallocate shipment volume.
-* Improve delivery reliability.
-* Reduce SLA penalties.
-
----
-
-# Warehouse Performance Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/warehouse-performance.png`
-
-## Business Headline
-
-### Dispatch Bottlenecks Continue to Reduce Warehouse Throughput
-
-### Purpose
-
-Evaluate warehouse operational efficiency.
-
-### Questions Answered
-
-* Which warehouses process shipments most efficiently?
-* Which facilities experience dispatch delays?
-* Which warehouses require operational improvement?
-
-### Executive Decisions Supported
-
-* Optimize staffing.
-* Balance warehouse capacity.
-* Reduce dispatch delays.
-* Improve warehouse utilization.
-
----
-
-# Regional Performance Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/regional-performance.png`
-
-## Business Headline
-
-### Delivery Performance Differs Across Regional Logistics Networks
-
-### Purpose
-
-Compare logistics performance across geographical regions.
-
-### Questions Answered
-
-* Which regions experience higher delivery delays?
-* Where are SLA breaches concentrated?
-* Which markets require operational investment?
-
-### Executive Decisions Supported
-
-* Improve regional distribution.
-* Optimize logistics routes.
-* Allocate transportation resources.
-* Improve customer experience.
-
----
-
-# Seller Performance Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/seller-performance.png`
-
-## Business Headline
-
-### Logistics Performance Directly Influences Seller Experience
-
-### Purpose
-
-Measure how operational performance affects marketplace sellers.
-
-### Questions Answered
-
-* Which sellers experience higher shipment delays?
-* Which sellers generate greater shipment volumes?
-* Which sellers require operational support?
-
-### Executive Decisions Supported
-
-* Improve seller satisfaction.
-* Prioritize strategic sellers.
-* Reduce seller complaints.
-* Strengthen marketplace relationships.
-
----
-
-# Financial Impact Dashboard
-
-> **[ DASHBOARD PLACEHOLDER ]**
-
-`images/dashboard/financial-impact.png`
-
-## Business Headline
-
-### Operational Inefficiencies Continue to Increase Logistics Costs
-
-### Purpose
-
-Measure the financial consequences of delivery performance.
-
-### Questions Answered
-
-* What is the cost of SLA breaches?
-* Which operational failures generate the greatest financial impact?
-* Which improvements produce the highest return?
-
-### Executive Decisions Supported
-
-* Reduce logistics expenditure.
-* Prioritize operational investments.
-* Improve profitability.
-* Support budget planning.
-
----
-
-# Business Recommendations
-
-The analytical platform identifies several opportunities to improve marketplace logistics performance.
-
-## Carrier Optimization
-
-Monitor carrier reliability continuously and rebalance shipment allocation toward higher performing logistics partners.
-
-**Expected Business Impact**
-
-* Reduced SLA breaches
-* Lower penalty costs
-* Improved customer satisfaction
-
----
-
-## Warehouse Optimization
-
-Increase visibility into warehouse dispatch bottlenecks and redistribute operational capacity before congestion affects downstream deliveries.
-
-**Expected Business Impact**
-
-* Faster shipment processing
-* Improved warehouse efficiency
-* Lower delivery delays
-
----
-
-## Regional Logistics Planning
-
-Use regional performance analytics to identify underserved markets and optimize transportation networks.
-
-**Expected Business Impact**
-
-* Better delivery consistency
-* Improved customer experience
-* Higher operational efficiency
-
----
-
-## Executive KPI Governance
-
-Establish standardized KPI definitions across departments to ensure consistent reporting and trusted executive decision making.
-
-**Expected Business Impact**
-
-* Greater reporting consistency
-* Faster executive decision making
-* Improved cross functional collaboration
-
----
-
-# Project Challenges
-
-Although the final platform appears straightforward, developing a reliable analytical solution required significant engineering effort.
-
-## Learning dbt While Building a Production Style Project
-
-Rather than completing tutorials independently, dbt was learned by implementing it directly within a complete Analytics Engineering workflow.
-
-This required understanding:
-
-* Model dependencies
-* Materializations
-* Refactoring SQL into modular transformations
-* Testing
-* Documentation
-* Data lineage
-
-The learning process became part of the engineering experience itself.
-
----
-
-## Generating Realistic Operational Data
-
-Synthetic data generation proved to be the most technically demanding component of the project.
-
-Instead of randomly generating records, the objective was to preserve realistic relationships across millions of operational events while ensuring downstream KPIs remained logically consistent.
-
-This included maintaining relationships between:
-
-* Orders
-* Shipments
-* Warehouses
-* Carriers
-* Sellers
-* Tracking Events
-* Delivery Outcomes
-
-A single inconsistency introduced during generation could propagate across multiple Gold marts and dashboards.
-
----
-
-## Business Validation Beyond SQL
-
-One of the most valuable lessons came after the dbt models successfully executed.
-
-Although transformation tests passed, several Power BI metrics produced unexpected business results.
-
-This required tracing KPIs backward through:
-
-Power BI
-
-↓
-
-Gold Marts
-
-↓
-
-Silver Models
-
-↓
-
-Fact Tables
-
-↓
-
-Synthetic Data Generation
-
-Rather than assuming the dashboard was correct because the SQL executed successfully, every metric was manually validated against business expectations.
-
-This iterative debugging process significantly strengthened the overall analytical quality of the platform.
-
----
-
-# Lessons Learned
-
-Building this platform reinforced several important principles of modern Analytics Engineering.
-
-* Technical correctness does not automatically produce trustworthy business metrics.
-* Data validation is equally as important as data transformation.
-* Executive dashboards should answer business questions rather than display isolated KPIs.
-* Documentation, governance, and communication are critical components of enterprise analytics.
-* Modern Analytics Engineers require business understanding in addition to technical expertise.
-
----
-
-# Future Roadmap
-
-The current implementation establishes the analytical foundation.
-
-Future enhancements include:
-
-* Apache Airflow workflow orchestration
-* Snowflake cloud warehouse migration
-* Incremental dbt models
-* Docker based deployment
-* CI/CD pipelines
-* Automated data quality monitoring
-* Real time streaming pipelines
-* Predictive delivery time estimation
-* Machine learning based anomaly detection
-* Semantic Layer implementation
-
-These enhancements will extend the project from a portfolio demonstration into a production ready enterprise analytics platform.
-
----
-
-# Closing Statement
-
-The Marketplace Logistics Intelligence Platform demonstrates how Analytics Engineering extends beyond writing SQL or building dashboards.
-
-It represents the complete lifecycle of modern analytics, from synthetic operational data generation and governed transformations to executive reporting, business storytelling, and strategic decision support.
-
-The project reflects an engineering mindset focused on designing analytical systems that are scalable, maintainable, transparent, and aligned with real business objectives rather than simply producing visualizations.
+<p align="center"><sub>Questions about any specific number, design decision, or the engineering bug above — happy to walk through it.</sub></p>
