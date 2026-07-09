@@ -17,7 +17,7 @@
 
 ---
 
-### Read This in 60 Seconds
+### Important Note
 
 > **What this is:** a self-generated ~500K-shipment logistics dataset, built into a governed dbt/DuckDB warehouse, analyzed the way an operations consultant would — not "here's a dashboard" but "here's why the numbers look this way, and what I'd fix first."
 >
@@ -92,8 +92,7 @@ Full ERD, table-level grain, and SCD2 design notes: **`docs/data_model.md`**
 ## 4. Executive Summary
 
 <div align="center">
-<img width="900" src="images/dashboard-overview.png" alt="Overview dashboard screenshot — placeholder" />
-<br><sub><i>Overview dashboard — placeholder, screenshot pending</i></sub>
+<img width="1317" height="644" alt="Image" src="https://github.com/user-attachments/assets/c4e56699-21ad-46d8-ba57-d8005303c2ce" />
 </div>
 
 <br>
