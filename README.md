@@ -73,6 +73,12 @@ The warehouse follows a **Medallion Architecture** (Bronze → Silver → Gold) 
 </table>
 </div>
 
+<div align ="centre">
+<img width="2817" height="977" alt="Image" src="https://github.com/user-attachments/assets/c9013059-c0f5-4d39-bce5-8330a8ab823b" />
+</div>
+
+<br>
+
 **Initial checks performed before any analysis began** (full methodology in `docs/data_quality_audit.md`):
 
 | Check | Result |
