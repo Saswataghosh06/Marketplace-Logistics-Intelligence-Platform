@@ -92,7 +92,7 @@ Full ERD, table-level grain, and SCD2 design notes: **`docs/data_model.md`**
 ## 4. Executive Summary
 
 <div align="center">
-<img width="1317" height="644" alt="Image" src="https://github.com/user-attachments/assets/c4e56699-21ad-46d8-ba57-d8005303c2ce" />
+<img width="1317" height="644" alt="Image" src="https://github.com/user-attachments/assets/2169567a-83d8-4901-b5d4-7bb4a137f7b7" />
 </div>
 
 <br>
@@ -122,7 +122,9 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.1 Carrier Performance
 
 <div align="center">
-<img width="1314" height="636" alt="Image" src="https://github.com/user-attachments/assets/14b6095e-454f-4944-98e6-df5fdbe15963" />
+<img width="1314" height="647" alt="Image" src="https://github.com/user-attachments/assets/104f2089-4d9b-4e07-829f-e03f575a0bd9" />
+
+
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -139,7 +141,8 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.2 Warehouse Performance
 
 <div align="center">
-<img width="1305" height="644" alt="Image" src="https://github.com/user-attachments/assets/4eb3ad3c-d9fc-4eae-b597-6d3ad06b367b" />
+<img width="1317" height="647" alt="Image" src="https://github.com/user-attachments/assets/f24ed7d2-e775-430b-8c40-40700f97f836" />
+
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -156,7 +159,8 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.3 Region Performance
 
 <div align="center">
-<img width="1312" height="604" alt="Image" src="https://github.com/user-attachments/assets/a953e6d7-b7e5-49a0-adc2-4ac676c6c5cb" />
+<img width="1320" height="647" alt="Image" src="https://github.com/user-attachments/assets/dea6b0b3-b1cd-471a-a502-580b9193dfa0" />
+
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -174,7 +178,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.4 Seller Performance
 
 <div align="center">
-<img width="1320" height="647" alt="Image" src="https://github.com/user-attachments/assets/86502fad-baa5-4410-8028-4acdaad24c38" />
+<img width="1317" height="647" alt="Image" src="https://github.com/user-attachments/assets/07fa2ee7-6911-4d08-b108-bf59af33fb4f" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
@@ -190,7 +194,7 @@ Full findings, by mart, with the evidence behind each number, are in Section 5.
 ### 5.5 Financial Impact
 
 <div align="center">
-<img width="1302" height="641" alt="Image" src="https://github.com/user-attachments/assets/b48331d0-bc14-41b6-bb03-22435c0c7c69" />
+<img width="1320" height="649" alt="Image" src="https://github.com/user-attachments/assets/7c71338f-e0c1-45d5-911e-84fb825f7145" />
 </div>
 
 | Business Metric | Value | Historical / Comparative Trend |
