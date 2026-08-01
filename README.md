@@ -469,6 +469,3 @@ marketplace-logistics-intelligence-platform/
 ---
 
 <p align="center"><sub>Questions about any specific number, modeling decision, or the engineering behind a claim above — happy to walk through it.</sub></p>
-```
-
-**Ready for the Customer Churn README next?**
