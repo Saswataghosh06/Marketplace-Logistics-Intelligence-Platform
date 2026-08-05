@@ -8,7 +8,7 @@
 <p align="center">
   <img alt="status" src="https://img.shields.io/badge/status-portfolio_case_study-1E56C7">
   <img alt="data" src="https://img.shields.io/badge/data-synthetic_%2F_self_generated-8B98AE">
-  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_Airflow_%7C_Docker-1E56C7">
+  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_GitHub_Actions_%7C_Docker-1E56C7">
   <img alt="quality" src="https://img.shields.io/badge/data_quality-0_nulls_%7C_0_duplicates-12A879">
 </p>
 
@@ -33,7 +33,7 @@ I'm approaching this project the way an analytics engineer would approach a firs
 
 The "client" here is a simulated national e-commerce logistics network — 25 carriers, 120 warehouses, 5 regions, 2,000 marketplace sellers, ~500K shipments across four years (2022–2025). I designed and generated this dataset myself in Python specifically so it would behave like a real operational system: messy in the ways real systems are messy (missing references, late-arriving records, duplicate events), not the clean, pre-solved version you get from a Kaggle download.
 
-On top of that data, I built a governed dimensional warehouse (Bronze → Silver → Gold), orchestrated it with Apache Airflow in Docker, and ran a cross-functional diagnostic across six business-domain marts — Overview, Carrier, Warehouse, Region, Seller, and Financial — to answer the kind of question a COO actually asks, not the kind a tutorial asks.
+On top of that data, I built a governed dimensional warehouse (Bronze → Silver → Gold), governed it with an automated CI/CD pipeline using GitHub Actions and Docker, and ran a cross-functional diagnostic across six business-domain marts — Overview, Carrier, Warehouse, Region, Seller, and Financial — to answer the kind of question a COO actually asks, not the kind a tutorial asks.
 
 ---
 
@@ -63,11 +63,8 @@ The warehouse follows a **Medallion Architecture** (Bronze → Silver → Gold) 
 <div align="center">
 <table>
 <tr>
-<td width="50%" align="center"><b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
-<img width="420" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
-</td>
-<td width="50%" align="center"><b>Airflow Orchestration DAG</b><br><sub>4-task pipeline, all green</sub><br><br>
-<img width="420" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" alt="Airflow DAG success run" />
+<td width="100%" align="center"><b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
+<img width="600" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
 </td>
 </tr>
 </table>
@@ -262,7 +259,7 @@ Prioritized by impact vs. effort — the same triage a real budget cycle applies
 | Raw storage | Parquet | Immutable Bronze source |
 | Warehouse | DuckDB | Embedded OLAP — see note below |
 | Transformation | dbt Core | Tests, docs, and lineage a raw SQL script doesn't give you |
-| Orchestration | Apache Airflow (in Docker) | Local orchestration, not a managed cloud instance |
+| Orchestration | GitHub Actions (in Docker) | Automated CI/CD pipeline, not a managed cloud instance |
 | Governance | dbt schema tests (YAML) | Enforced contracts between Bronze/Silver/Gold |
 | Reporting | Interactive HTML dashboard | See `/dashboards` |
 
@@ -275,7 +272,7 @@ marketplace-logistics-intelligence-platform/
 ├── python/{generators, exports, utilities}
 ├── warehouse/logistics.duckdb
 ├── dbt/logistics_project/models/{bronze, silver, gold}
-├── airflow/{dags, Dockerfile, docker-compose.yml}
+├── .github/workflows/
 ├── dashboards/            # interactive HTML BI console
 ├── docs/                  # full technical documentation (see below)
 ├── images/
@@ -287,7 +284,7 @@ marketplace-logistics-intelligence-platform/
 
 | Document | What's in it |
 |---|---|
-| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, Airflow DAG design, and the dbt/`profiles.yml` environment-parity bug I hit and fixed during orchestration |
+| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, GitHub Actions CI/CD design, and the dbt/`profiles.yml` environment-parity bug I hit and fixed during deployment |
 | [`docs/data_model.md`](./docs/data_model.md) | ERD, star schema, SCD Type 2 design and rationale |
 | [`docs/data_quality_audit.md`](./docs/data_quality_audit.md) | Full data quality framework, anomaly injection and handling rules |
 | [`docs/data_dictionary.md`](./docs/data_dictionary.md) | Column-level definitions for every Gold mart |
@@ -299,10 +296,10 @@ marketplace-logistics-intelligence-platform/
 ## 8. Caveats & Assumptions
 
 - **All data is synthetic.** Every figure above — the ₹98.57M spend, the 6.97% breach rate, the 22.99% seller outlier — comes from a dataset I designed and generated myself in Python. It is not a real company's financials, and I'm stating that plainly here rather than letting the findings read as market research.
-- **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), the orchestration bug actually hit and fixed (`docs/project_architecture.md`), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
+- **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), the deployment bug actually hit and fixed (`docs/project_architecture.md`), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
 - **Shipment totals don't fully agree across marts, and that's disclosed, not hidden.** Carrier and Financial marts total 499,500 shipments; Warehouse totals 494,505 (−1.0%); Overview totals 493,940 (−1.1%); Region totals 492,002 (−1.5%). This follows each mart's own governance rules (a shipment with no assigned warehouse is excluded from the Warehouse mart, no assigned region excluded from the Region mart, etc. — see `docs/data_quality_audit.md`) rather than being an error. Practically: any "% of volume" figure in the Region section (5.3) is computed against that mart's own 492,002 total, not the 499,500 figure used in the Executive Summary — both are correct for what they're measuring, they're just not the same denominator.
 - **This reflects one pipeline run, one point in time.** A production version would track KPI drift across runs, not a single snapshot.
-- **Airflow runs locally in Docker**, not on managed cloud infrastructure. It demonstrates the ability to build and debug a real DAG; it does not claim production-scale orchestration experience.
+- **The CI/CD pipeline runs via GitHub Actions with Docker containers**, not on managed cloud infrastructure. It demonstrates the ability to build and debug an automated deployment pipeline; it does not claim production-scale orchestration experience.
 - **SCD Type 2** is implemented correctly on `dim_customers` and `dim_carriers`, but the underlying change events are synthetically generated so the logic has something to track — happy to walk through that distinction directly.
 
 ---

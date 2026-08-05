@@ -1,5 +1,3 @@
-# DATA_MODEL.md
-
 # Marketplace Logistics Intelligence Platform
 
 ## Dimensional Data Model
@@ -52,7 +50,7 @@ The pipeline transforms raw marketplace logistics data through Bronze, Silver, a
 | Bronze | Python + Parquet |
 | Warehouse | DuckDB |
 | Transformations | dbt Core |
-| Orchestration | Apache Airflow |
+| Orchestration | GitHub Actions |
 | Deployment | Docker |
 | Reporting | Dashboard Visualization |
 
@@ -367,9 +365,15 @@ Dashboard Visualization
 
 # Pipeline Integration
 
-The warehouse is refreshed through Apache Airflow.
+The warehouse is refreshed through an automated CI/CD pipeline using GitHub Actions and Docker.
 
 ```text
+GitHub Actions (CI/CD)
+
+        │
+
+        ▼
+
 load_bronze.py
 
         │
@@ -435,4 +439,4 @@ The Marketplace Logistics Intelligence Platform implements a modern dimensional 
 
 The solution transforms 11 raw Bronze datasets into 7 reusable dimensions, 4 transactional fact tables, and 6 business ready Gold marts.
 
-Apache Airflow orchestrates the complete ELT pipeline while Docker provides reproducible deployment. The resulting datasets support dashboard visualization and executive analytics through a scalable Analytics Engineering architecture.
+An automated CI/CD pipeline using GitHub Actions and Docker orchestrates the complete ELT pipeline. The resulting datasets support dashboard visualization and executive analytics through a scalable Analytics Engineering architecture.

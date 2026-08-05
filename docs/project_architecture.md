@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Logistics Analytics Platform follows a modern Medallion Architecture combined with production style orchestration using Apache Airflow and containerization with Docker.
+The Logistics Analytics Platform follows a modern Medallion Architecture combined with production-style orchestration using an automated CI/CD pipeline with GitHub Actions and Docker.
 
 The architecture is designed to separate raw ingestion, business transformations, orchestration, and reporting into independent layers.
 
@@ -11,6 +11,9 @@ The complete pipeline is automated from data ingestion through business-ready an
 ---
 
 # High Level Architecture
+
+<details>
+<summary><b>📂 Click to expand: High Level Architecture Flow</b></summary>
 
 ```text
                     Source Dataset (Parquet) [Synthetic Raw Dataset generated via Python]
@@ -109,8 +112,9 @@ Power BI
 or
 
 HTML / Streamlit Dashboard
-
 ```
+
+</details>
 
 ---
 
@@ -141,13 +145,19 @@ Gold (Marts): Aggregated, business-logic-ready datasets. Each mart is optimized 
 
 ---
 
-# Airflow Orchestration
+# CI/CD Orchestration
 
-The complete pipeline is orchestrated using Apache Airflow running inside Docker.
+The codebase is governed by an automated CI/CD pipeline using GitHub Actions and Docker.
 
 Pipeline execution order
 
+<details>
+<summary><b>📂 Click to expand: Pipeline Execution Flow</b></summary>
+
 ```text
+GitHub Actions (CI/CD)
+        │
+        ▼
 load_bronze.py
         │
         ▼
@@ -160,39 +170,43 @@ dbt build
 export_gold_marts.py
 ```
 
+</details>
+
 Each task executes only after the previous task completes successfully.
 
 ---
 
 # Docker Architecture
 
-```text
-Docker
+<details>
+<summary><b>📂 Click to expand: Docker & CI/CD Architecture</b></summary>
 
-├── PostgreSQL
-│      Airflow Metadata Database
+```text
+GitHub Actions (CI/CD)
 │
-├── Airflow API Server
-│      Web UI
-│
-├── Airflow Scheduler
-│      DAG Scheduling
-│
-├── Airflow DAG Processor
-│      DAG Parsing
-│
-└── Mounted Project
+└── Docker Container (ubuntu-latest)
        │
-       ├── dags
-       ├── scripts
-       ├── dbt
-       ├── warehouse
-       └── data
+       ├── Checkout Repository
+       │
+       ├── Install Dependencies
+       │      (dbt-duckdb, duckdb, pandas, pyarrow)
+       │
+       └── Execute Pipeline Steps
+              │
+              ├── python scripts/load_bronze.py
+              ├── dbt debug
+              ├── dbt build
+              └── python scripts/export_gold_marts.py
 ```
+
+</details>
 
 ---
 
 # Data Flow
+
+<details>
+<summary><b>📂 Click to expand: Data Flow Diagram</b></summary>
 
 ```text
 Parquet Datasets
@@ -230,6 +244,8 @@ Gold CSV Exports
 Dashboard
 ```
 
+</details>
+
 ---
 
 # Technology Stack
@@ -240,9 +256,8 @@ Dashboard
 | Warehouse | DuckDB |
 | Transformation | dbt Core |
 | Governance | Yaml Schemas |
-| Orchestration | Apache Airflow |
+| Orchestration | GitHub Actions |
 | Containers | Docker |
-| Metadata Database | PostgreSQL |
 | Data Format | Parquet |
 | Output | CSV |
 | Dashboard | Power BI / HTML / Streamlit |
@@ -251,6 +266,9 @@ Dashboard
 ---
 
 # Folder Responsibilities
+
+<details>
+<summary><b>📂 Click to expand: Folder Structure</b></summary>
 
 ```text
 scripts/
@@ -272,14 +290,12 @@ data/
 ├── bronze/
 └── gold/
 
-airflow/
-├── dags/
-├── plugins/
-├── logs/
-├── Dockerfile
-├── docker-compose.yml
-└── requirements.txt
+.github/
+└── workflows/
+      └── logistics_pipeline.yml
 ```
+
+</details>
 
 ---
 

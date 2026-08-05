@@ -1,5 +1,3 @@
-# DATA_QUALITY_REPORT.md
-
 # Marketplace Logistics Intelligence Platform
 
 ## Data Quality and Governance Report
@@ -102,9 +100,13 @@ Operational investigations use Silver.
 
 # Pipeline Orchestration
 
-The complete ELT workflow is orchestrated using Apache Airflow.
+The codebase is governed by an automated CI/CD pipeline using GitHub Actions and Docker.
 
 Pipeline
+
+GitHub Actions (CI/CD)
+
+↓
 
 load_bronze.py
 
@@ -120,11 +122,10 @@ dbt build
 
 export_gold_marts.py
 
-The DAG guarantees:
+The CI/CD workflow guarantees:
 
 * Ordered execution
-* Retry handling
-* Task monitoring
+* Automated retry handling
 * Execution logging
 * End to end reproducibility
 
@@ -132,7 +133,7 @@ The DAG guarantees:
 
 # Data Quality Framework
 
-```id="ewovju"
+```text
 Raw Operational Data
 
         │
@@ -172,7 +173,7 @@ Report
 
 # Data Quality Checks
 
-The project implements automated validation through a combination of dbt generic tests, DuckDB constraints, and orchestration validation in Apache Airflow. Every pipeline execution is monitored by Airflow, ensuring that downstream transformations only execute after successful completion of upstream stages.
+The project implements automated validation through a combination of dbt generic tests, DuckDB constraints. Every pipeline execution is monitored by GitHub Actions, ensuring that downstream transformations only execute after successful completion of upstream stages.
 
 Validation categories include:
 
@@ -328,7 +329,13 @@ Exported CSVs are generated only after all dbt models complete successfully.
 
 Every transformation follows the same validation process.
 
-```id="vfhw4o"
+```text
+GitHub Actions (CI/CD)
+
+        │
+
+        ▼
+
 load_bronze.py
 
         │
@@ -404,13 +411,13 @@ All production models successfully pass automated dbt testing after governance r
 
 # Deployment Validation
 
-The complete pipeline executes inside Docker containers.
+The complete pipeline executes inside Docker containers via GitHub Actions.
 
 Docker guarantees
 
 * Identical execution environment
 * Consistent dependencies
-* Reproducible orchestration
+* Reproducible CI/CD workflows
 * Platform independence
 
 ---
@@ -437,4 +444,4 @@ Business users receive:
 
 # Summary
 
-The Marketplace Logistics Intelligence Platform follows modern Analytics Engineering practices where raw operational data is preserved in Bronze, standardized in Silver, transformed into six business focused Gold marts using dbt, orchestrated end to end through Apache Airflow running on Docker, and exported as governed analytical datasets for dashboard visualization. This layered approach provides traceability, reproducibility, historical accuracy, and trusted business reporting while remaining scalable for future enhancements.
+The Marketplace Logistics Intelligence Platform follows modern Analytics Engineering practices where raw operational data is preserved in Bronze, standardized in Silver, transformed into six business focused Gold marts using dbt, governed end to end through an automated CI/CD pipeline using GitHub Actions and Docker, and exported as governed analytical datasets for dashboard visualization. This layered approach provides traceability, reproducibility, historical accuracy, and trusted business reporting while remaining scalable for future enhancements.

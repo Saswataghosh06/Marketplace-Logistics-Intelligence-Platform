@@ -1,5 +1,3 @@
-# PROJECT_STRUCTURE.md
-
 # Marketplace Logistics Intelligence Platform
 
 ## Repository Structure
@@ -25,6 +23,9 @@ This structure improves:
 
 # Repository Overview
 
+<details>
+<summary><b>📂 Click to expand: Directory Structure</b></summary>
+
 ```text
 marketplace-logistics-intelligence-platform/
 
@@ -32,6 +33,9 @@ marketplace-logistics-intelligence-platform/
 ├── data/
 │   ├── bronze/(python generated raw synthetic parquet datasets) 
 │   └── gold/(exported CSV files)
+│
+├── .github/
+│   └── workflows/ (GitHub Actions CI/CD pipelines)
 │
 ├── notebooks/
 │
@@ -54,6 +58,8 @@ marketplace-logistics-intelligence-platform/
 ├── README.md
 └── requirements.txt
 ```
+
+</details>
 
 ---
 
@@ -113,6 +119,9 @@ Responsibilities include:
 
 The dbt project contains all transformation logic.
 
+<details>
+<summary><b>📂 Click to expand: dbt Models Structure</b></summary>
+
 ```text
 models/
 
@@ -132,6 +141,8 @@ models/
 
     schema.yml
 ```
+
+</details>
 
 ---
 
@@ -271,9 +282,39 @@ Includes:
 
 ---
 
+# Pipeline & Orchestration
+
+The codebase is governed by an automated CI/CD pipeline using GitHub Actions and Docker.
+
+<details>
+<summary><b>📂 Click to expand: Pipeline Flow</b></summary>
+
+```text
+GitHub Actions (CI/CD)
+        │
+        ▼
+load_bronze.py
+        │
+        ▼
+dbt debug
+        │
+        ▼
+dbt build
+        │
+        ▼
+export_gold_marts.py
+```
+
+</details>
+
+---
+
 # Development Workflow
 
 Every feature follows the same lifecycle.
+
+<details>
+<summary><b>📂 Click to expand: Development Workflow</b></summary>
 
 ```text
 Generate Data
@@ -332,6 +373,8 @@ Documentation
 
 Git Commit
 ```
+
+</details>
 
 ---
 

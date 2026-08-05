@@ -1,5 +1,3 @@
-# DATA_DICTIONARY.md
-
 # Marketplace Logistics Intelligence Platform
 
 ## Enterprise Data Dictionary
@@ -14,7 +12,7 @@ The data dictionary acts as the central metadata reference for Analytics Enginee
 
 Rather than documenting every technical column, this document focuses on the business meaning of each dataset, its grain, ownership, measures, and relationships that support reporting, KPI calculations, and executive decision making.
 
-The data dictionary reflects the final Version 2 architecture of the project, which uses DuckDB as the analytical warehouse, dbt Core for transformations, Apache Airflow for orchestration, Docker Compose for deployment, and Gold Business Marts for dashboard visualization.
+The data dictionary reflects the final Version 2 architecture of the project, which uses DuckDB as the analytical warehouse, dbt Core for transformations, an automated CI/CD pipeline using GitHub Actions and Docker for orchestration and deployment, and Gold Business Marts for dashboard visualization.
 
 ---
 
@@ -29,9 +27,15 @@ The project follows a Medallion Architecture combined with dimensional modeling.
 | Silver | Staging models, dimensions, and fact tables |
 | Gold | Business-ready analytical marts |
 
-The complete ELT pipeline is orchestrated using Apache Airflow.
+The codebase is governed by an automated CI/CD pipeline using GitHub Actions and Docker.
 
 ```text
+GitHub Actions (CI/CD)
+
+        │
+
+        ▼
+
 Bronze Parquet Files
 
         │
@@ -790,8 +794,8 @@ The Marketplace Logistics Intelligence Platform combines multiple modern analyti
 | Storage | Parquet |
 | Warehouse | DuckDB |
 | Transformation | dbt Core |
-| Orchestration | Apache Airflow |
-| Containerization | Docker Compose |
+| Orchestration | GitHub Actions |
+| Containerization | Docker |
 | Business Output | Gold Business Marts |
 | Dashboard Layer | Dashboard Visualization (Power BI, Streamlit, HTML, etc.) |
 
@@ -802,7 +806,7 @@ The Marketplace Logistics Intelligence Platform combines multiple modern analyti
 The complete data lineage follows the ELT workflow below.
 
 ```text
-Synthetic Dataset Generation
+GitHub Actions (CI/CD)
 
         │
 
@@ -932,7 +936,7 @@ Operational investigations and root cause analysis are performed using Silver di
 
 # Summary
 
-The Marketplace Logistics Intelligence Platform implements a production style Analytics Engineering architecture built on DuckDB, dbt Core, Apache Airflow, and Docker Compose.
+The Marketplace Logistics Intelligence Platform implements a production style Analytics Engineering architecture built on DuckDB, dbt Core, GitHub Actions, and Docker.
 
 The warehouse contains:
 
@@ -941,8 +945,8 @@ The warehouse contains:
 * **4 transactional fact tables**
 * **6 governed Gold business marts**
 
-Data flows through an automated ELT pipeline orchestrated by Apache Airflow:
+Data flows through an automated CI/CD pipeline using GitHub Actions and Docker:
 
-**load_bronze.py → dbt debug → dbt build → export_gold_marts.py**
+**GitHub Actions (CI/CD) → load_bronze.py → dbt debug → dbt build → export_gold_marts.py**
 
 The resulting Gold Business Marts provide trusted datasets for dashboard visualization, executive reporting, KPI monitoring, and business decision making while maintaining complete traceability back to the original operational data.

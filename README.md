@@ -8,7 +8,7 @@
 <p align="center">
   <img alt="status" src="https://img.shields.io/badge/status-portfolio_case_study-1E56C7">
   <img alt="data" src="https://img.shields.io/badge/data-synthetic_%2F_self_generated-8B98AE">
-  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_Airflow_%7C_Docker-1E56C7">
+  <img alt="stack" src="https://img.shields.io/badge/stack-dbt_%7C_DuckDB_%7C_GitHub_Actions_%7C_Docker-1E56C7">
   <img alt="quality" src="https://img.shields.io/badge/data_quality-0_nulls_%7C_0_duplicates-12A879">
 </p>
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-A Medallion Architecture data pipeline that ingests a self-generated ~500K-shipment synthetic logistics dataset into DuckDB, models it into a star schema with 7 dimensions and 4 fact tables using dbt Core, and delivers 6 business-ready Gold marts for carrier, warehouse, region, seller, financial, and enterprise-wide analytics. The pipeline is orchestrated with Apache Airflow in Docker and includes SCD Type 2 tracking on customers and carriers.
+A Medallion Architecture data pipeline that ingests a self-generated ~500K-shipment synthetic logistics dataset into DuckDB, models it into a star schema with 7 dimensions and 4 fact tables using dbt Core, and delivers 6 business-ready Gold marts for carrier, warehouse, region, seller, financial, and enterprise-wide analytics. The codebase is governed by an automated CI/CD pipeline using GitHub Actions and Docker, and includes SCD Type 2 tracking on customers and carriers.
 
 The dataset was designed to simulate real operational mess — missing references, late-arriving records, duplicate events, future-dated transactions — and the pipeline handles each case explicitly rather than silently dropping rows.
 
@@ -42,7 +42,7 @@ On the analytical side, the pipeline surfaced that premium carriers cost 5.8× m
 **Pipeline flow:**
 
 ```
-load_bronze.py → dbt debug → dbt build → export_gold_marts.py
+GitHub Actions (CI/CD) → load_bronze.py → dbt debug → dbt build → export_gold_marts.py
 ```
 
 **Source datasets (11 Bronze tables):**
@@ -68,8 +68,7 @@ load_bronze.py → dbt debug → dbt build → export_gold_marts.py
 ### Star Schema
 
 <div align="center">
-<img width="100%" alt="ERD placeholder — replace with draw.io export" src="https://via.placeholder.com/1200x500/1a1a2e/eee?text=ERD+Diagram+Placeholder%0A7+Dimensions+%7C+4+Facts+%7C+6+Gold+Marts" />
-<br><sub>⬆️ Replace this placeholder with your ERD diagram from draw.io</sub>
+
 </div>
 
 ### Dimensions
@@ -116,6 +115,9 @@ load_bronze.py → dbt debug → dbt build → export_gold_marts.py
 
 ### Sample Model: `dim_customers` (with Unknown row)
 
+<details>
+<summary><b>📂 Click to expand: dim_customers.sql</b></summary>
+
 ```sql
 select
     customer_sk,
@@ -154,7 +156,12 @@ select
     current_timestamp as created_at
 ```
 
+</details>
+
 ### Sample Model: `mart_financial_impact`
+
+<details>
+<summary><b>📂 Click to expand: mart_financial_impact.sql</b></summary>
 
 ```sql
 {{ config(materialized = 'table') }}
@@ -216,6 +223,8 @@ from shipment_metrics s
 cross join financial_metrics f
 ```
 
+</details>
+
 ---
 
 ## Data Quality
@@ -257,83 +266,82 @@ The dataset was designed with intentional operational anomalies to simulate real
 
 ---
 
-## Pipeline & Orchestration
+## Pipeline & CI/CD
 
-### Airflow DAG: `logistics_pipeline`
+### CI/CD Workflow: `logistics_pipeline`
 
 <div align="center">
-<table>
-<tr>
-<td width="50%" align="center"><b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
-<img width="420" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
-</td>
-<td width="50%" align="center"><b>Airflow Orchestration DAG</b><br><sub>4-task pipeline, all green</sub><br><br>
-<img width="420" src="https://github.com/user-attachments/assets/463291d2-331b-4119-b0b2-4ed16cb155e2" alt="Airflow DAG success run" />
-</td>
-</tr>
-</table>
+<b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
+<img width="600" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
 </div>
 
-```python
-from datetime import datetime, timedelta
-from airflow import DAG
-from airflow.providers.standard.operators.bash import BashOperator
+<details>
+<summary><b>📂 Click to expand: GitHub Actions Workflow YAML</b></summary>
 
-PROJECT_DIR = "/opt/airflow/project"
-DBT_PROJECT = "/opt/airflow/project/dbt/logistics_project"
+```yaml
+name: CI/CD Pipeline
 
-default_args = {
-    "owner": "saswata",
-    "retries": 3,
-    "retry_delay": timedelta(seconds=30),
-}
+on:
+  push:
+    branches:
+      - main
 
-with DAG(
-    dag_id="logistics_pipeline",
-    description="End to End Logistics Analytics Pipeline",
-    start_date=datetime(2026, 7, 1),
-    schedule="@daily",
-    catchup=False,
-    default_args=default_args,
-    tags=["logistics", "dbt", "duckdb"],
-) as dag:
+jobs:
+  lint-python-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    load_bronze = BashOperator(
-        task_id="load_bronze",
-        cwd=PROJECT_DIR,
-        bash_command="python scripts/load_bronze.py",
-    )
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
 
-    dbt_debug = BashOperator(
-        task_id="dbt_debug",
-        cwd=DBT_PROJECT,
-        bash_command="dbt debug --profiles-dir .",
-    )
+      - name: Install Flake8
+        run: pip install flake8
 
-    dbt_build = BashOperator(
-        task_id="dbt_build",
-        cwd=DBT_PROJECT,
-        bash_command="dbt build --profiles-dir .",
-    )
+      - name: Lint Scripts Folder
+        # Using --exit-zero so minor formatting issues don't crash the pipeline tonight
+        run: flake8 scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics --exit-zero
 
-    export_gold = BashOperator(
-        task_id="export_gold",
-        cwd=PROJECT_DIR,
-        bash_command="python scripts/export_gold_marts.py",
-    )
+  build-and-push-docker:
+    needs: lint-python-code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    load_bronze >> dbt_debug >> dbt_build >> export_gold
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/logistics-pipeline:latest
+
+         
 ```
+
+</details>
 
 | Setting | Value |
 |---|---|
-| Schedule | Daily |
-| Retries | 3 |
-| Retry Delay | 30 seconds |
-| Catchup | Disabled |
-| Containerized | Yes (Docker Compose) |
+| Schedule | Daily (cron: `0 0 * * *`) |
+| Runner | Ubuntu (GitHub-hosted) |
+| Containerized | Yes (Docker) |
+| Trigger | Schedule + Manual dispatch |
 
 ### dbt Project Configuration
+
+<details>
+<summary><b>📂 Click to expand: dbt_project.yml</b></summary>
 
 ```yaml
 models:
@@ -352,6 +360,8 @@ models:
         +schema: gold
 ```
 
+</details>
+
 ---
 
 ## Technical Decisions & Trade-offs
@@ -362,7 +372,7 @@ models:
 | Self-generated synthetic data | Public Kaggle dataset | Real operational data is messy. Public datasets are too clean. I wanted data that behaves like a real system — with missing references, late-arriving records, and duplicate events — so the pipeline would need to handle actual edge cases, not just happy-path transformations. |
 | Tables everywhere (no views) | Views for staging/intermediate | DuckDB is embedded — no shared compute cluster. Tables provide faster BI queries and guarantee consistent results between pipeline runs. No downside since there's no storage cost concern. |
 | 6 domain-specific marts | One big mart / flat table | Each mart serves a specific audience (logistics ops, finance, warehouse managers). A single mart would duplicate logic and be harder to maintain or extend. |
-| Airflow in Docker | Simple shell scripts | Airflow provides retries, scheduling, observability, and execution logging. A shell script would work but doesn't demonstrate production-style orchestration. |
+| GitHub Actions CI/CD | Simple shell scripts | GitHub Actions provides automated scheduling, retries, observability, and execution logging. A shell script would work but doesn't demonstrate production-style orchestration. |
 | SCD Type 2 on customers and carriers | SCD Type 1 (overwrite) | Customer profiles and carrier SLA configs change over time. Without historical tracking, period-over-period reporting would be inaccurate. |
 
 ### What I'd Change in Production
@@ -371,7 +381,7 @@ models:
 |---|---|---|
 | **Cloud warehouse** | DuckDB (embedded, local) | Move back to Snowflake or BigQuery for distributed compute, concurrency, and managed infrastructure |
 | **Source freshness** | No freshness monitoring | Add `freshness:` blocks to dbt source YAML with SLA thresholds and alerting |
-| **Orchestration** | Airflow in Docker (local) | Move to a managed service (MWAA, Astronomer) for reliability and monitoring |
+| **Orchestration** | GitHub Actions CI/CD | Add retry policies, failure alerts, and pipeline monitoring for production-grade reliability |
 | **Cross-mart validation** | Tests within each model only | Add integration tests verifying counts agree across marts (e.g., total shipments in carrier mart ≈ financial mart) |
 | **Incremental models** | All models are full-refresh | Make Gold marts incremental — append new data rather than rebuilding entire marts daily |
 | **Data observability** | No monitoring or alerting | Add pipeline failure alerts, row-count anomaly checks, and data drift detection |
@@ -426,19 +436,24 @@ A breached shipment costs the same as a successful one. Performance-linked carri
 
 ## Repository Structure
 
+<details>
+<summary><b>📂 Click to expand: Repository Structure</b></summary>
+
 ```
 marketplace-logistics-intelligence-platform/
 ├── data/{bronze, gold}
 ├── python/{generators, exports, utilities}
 ├── warehouse/logistics.duckdb
 ├── dbt/logistics_project/models/{bronze, silver, gold}
-├── airflow/{dags, Dockerfile, docker-compose.yml}
+├── .github/workflows/
 ├── dashboards/
 ├── docs/
 ├── images/
 ├── README.md
 └── SETUP.md
 ```
+
+</details>
 
 ---
 
@@ -448,7 +463,7 @@ marketplace-logistics-intelligence-platform/
 - **What is real:** the architecture decisions, the data quality problems built in on purpose (and how they're handled), and the cross-mart analytical method — that part is meant to transfer directly to a real job.
 - **Shipment totals don't fully agree across marts, and that's disclosed, not hidden.** Carrier and Financial marts total 499,500 shipments; Warehouse totals 494,505 (−1.0%); Overview totals 493,940 (−1.1%); Region totals 492,002 (−1.5%). This follows each mart's own governance rules (a shipment with no assigned warehouse is excluded from the Warehouse mart, etc.) rather than being an error. Both totals are correct for what they're measuring, they're just not the same denominator.
 - **This reflects one pipeline run, one point in time.** A production version would track KPI drift across runs, not a single snapshot.
-- **Airflow runs locally in Docker**, not on managed cloud infrastructure. It demonstrates the ability to build and debug a real DAG; it does not claim production-scale orchestration experience.
+- **The CI/CD pipeline runs via GitHub Actions with Docker containers**, demonstrating automated deployment and orchestration. It does not claim production-scale scheduling experience.
 - **SCD Type 2** is implemented correctly on `dim_customers` and `dim_carriers`, but the underlying change events are synthetically generated so the logic has something to track — happy to walk through that distinction directly.
 - **On DuckDB vs. a cloud warehouse:** this project was originally built against Snowflake and moved to DuckDB once trial access ran out. The dbt models don't reference anything DuckDB-specific. Pointing this project at Snowflake or BigQuery is a config change, not a rewrite.
 
@@ -462,7 +477,7 @@ marketplace-logistics-intelligence-platform/
 | [`docs/data_model.md`](./docs/data_model.md) | ERD, star schema, SCD Type 2 design and rationale |
 | [`docs/data_dictionary.md`](./docs/data_dictionary.md) | Column-level definitions for every dimension, fact, and Gold mart |
 | [`docs/data_quality_audit.md`](./docs/data_quality_audit.md) | Full data quality framework, anomaly injection and handling rules |
-| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, Airflow DAG design, Docker setup |
+| [`docs/project_architecture.md`](./docs/project_architecture.md) | Full pipeline architecture, CI/CD pipeline design, Docker setup |
 | [`docs/project_structure.md`](./docs/project_structure.md) | Repository layout and folder responsibilities |
 | [`SETUP.md`](./SETUP.md) | How to reproduce the full pipeline locally |
 
