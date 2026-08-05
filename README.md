@@ -30,7 +30,7 @@ On the analytical side, the pipeline surfaced that premium carriers cost 5.8× m
 ## Architecture
 
 <div align="center">
-<img width="2817" height="977" alt="Image" src="https://github.com/user-attachments/assets/c9013059-c0f5-4d39-bce5-8330a8ab823b" />
+<img width="2816" height="976" alt="Image" src="https://github.com/user-attachments/assets/0317f4aa-37fc-48bb-9195-982dd6938303" />
 </div>
 
 | Layer | Purpose | Materialization | Storage |
@@ -272,7 +272,7 @@ The dataset was designed with intentional operational anomalies to simulate real
 
 <div align="center">
 <b>dbt Lineage Graph</b><br><sub>Bronze sources → staging → dimensions/facts → 6 Gold marts</sub><br><br>
-<img width="600" src="https://github.com/user-attachments/assets/bc154db8-5fd6-44cd-b52d-e27d0d837e75" alt="dbt lineage graph" />
+<img width="1280" height="720" alt="Image" src="https://github.com/user-attachments/assets/01792c1f-c585-4fa7-8ae8-7cc1dda803a0" alt="dbt lineage graph" />
 </div>
 
 <details>
